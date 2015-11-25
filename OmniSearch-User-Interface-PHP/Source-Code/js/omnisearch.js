@@ -36,6 +36,12 @@ $(document).ready(function() {
         .on('input', function() {
             mirna_query(false);
         })
+        .on('dblclick', function() {
+            if($('#mirna_searchbox_div').is(':hidden'))
+                mirna_query(true);
+            else if(mirna_open)
+                $('#mirna_searchbox_div').find(':first-child').focus();
+        })
         .on('keydown', function(e) {
             var keyCode = e.keyCode || e.which;
 
@@ -55,7 +61,8 @@ $(document).ready(function() {
 
     $('#mirna_searchbox_div')
         .on('mousemove', 'p', function() {
-            $(this).focus();
+            if(mirna_open)
+                $(this).focus();
         })
         .on('click', 'p', function() {
             $('#mirna_searchbox_input').val($(this).text()).focus();
@@ -70,6 +77,20 @@ $(document).ready(function() {
                 if(keyCode == 13)
                     return false;
             }
+            else if(keyCode == 33) {
+                var index = $('#mirna_searchbox_div').find('p:focus').index();
+                var children = $('#mirna_searchbox_div').children();
+                index = Math.max(0, Math.min(index - 10, children.length - 1));
+                children[index].focus();
+                return false;
+            }
+            else if(keyCode == 34) {
+                var index = $('#mirna_searchbox_div').find('p:focus').index();
+                var children = $('#mirna_searchbox_div').children();
+                index = Math.max(0, Math.min(index + 10, children.length - 1));
+                children[index].focus();
+                return false;
+            }
             else if(keyCode == 38) {
                 $(this).prev().focus();
                 return false;
@@ -82,7 +103,14 @@ $(document).ready(function() {
 
     $('#term_searchbox_input')
         .on('input', function() {
-            term_query(false);
+            if(term_open)
+                term_query(false);
+        })
+        .on('dblclick', function() {
+            if($('#term_searchbox_div').is(':hidden'))
+                term_query(true);
+            else if(term_open)
+                $('#term_searchbox_div').find(':first-child').focus();
         })
         .on('keydown', function(e) {
             var keyCode = e.keyCode || e.which;
@@ -117,6 +145,20 @@ $(document).ready(function() {
                 $(this).parent().hide();
                 if(keyCode == 13)
                     return false;
+            }
+            else if(keyCode == 33) {
+                var index = $('#term_searchbox_div').find('p:focus').index();
+                var children = $('#term_searchbox_div').children();
+                index = Math.max(0, Math.min(index - 10, children.length - 1));
+                children[index].focus();
+                return false;
+            }
+            else if(keyCode == 34) {
+                var index = $('#term_searchbox_div').find('p:focus').index();
+                var children = $('#term_searchbox_div').children();
+                index = Math.max(0, Math.min(index + 10, children.length - 1));
+                children[index].focus();
+                return false;
             }
             else if(keyCode == 38) {
                 $(this).prev().focus();
@@ -178,8 +220,23 @@ $(document).ready(function() {
     });
 
     $('#select_all_cb').on('change', function() {
-        $('#results').find('input[type=checkbox]').prop('checked', $(this).is(':checked'));
-        selected = [];
+        if($(this).is(':checked')) {
+            $('#select_all_cb').prop('disabled', true);
+            $.get('/search.php', { type: 'all-targets', mirna: mirna, term: term })
+                .done(function(data) {
+                    selected = data.targets;
+                })
+                .fail(function() {
+                    alert('Failed to retrieve targets from server');
+                })
+                .always(function() {
+                    $('#select_all_cb').prop('disabled', false);
+                });
+        }
+        else {
+            selected = [];
+        }
+        $('#results_body').find('input[type=checkbox]').prop('checked', $(this).is(':checked'));
     });
 
     $('#results').find('tbody').on('change', 'input[type=checkbox]', function() {
@@ -187,6 +244,8 @@ $(document).ready(function() {
             selected.push($(this).val());
         else
             selected.remove($(this).val());
+
+        $('#select_all_cb').prop('checked', selected.length == target_count);
     });
 
     $('#clear_results_btn').on('click', function() {
@@ -254,17 +313,16 @@ $(document).ready(function() {
             var tool = $('#david_tool_select').find('option:selected').val();
 
             if(selected.length === 0) {
-                $.get('/search.php', { type: 'all-targets', mirna: mirna, term: term })
-                    .done(function(data) {
-                        selected = data.targets;
-                        window.open('http://david.abcc.ncifcrf.gov/api.jsp?type=GENE_SYMBOL&ids=' + selected.toString() + '&tool=' + tool, '_blank');
-                    })
-                    .fail(function() {
-                        alert('Failed to retrieve targets from server');
-                    });
+                alert('Please select one or more candidate targets');
             }
             else {
-                window.open('http://david.abcc.ncifcrf.gov/api.jsp?type=GENE_SYMBOL&ids=' + selected.toString() + '&tool=' + tool, '_blank');
+                var url = 'http://david.abcc.ncifcrf.gov/api.jsp?type=GENE_SYMBOL&ids=' + selected.toString() + '&tool=' + tool;
+                if (url.length > 2048) {
+                    alert('Generated DAVID URL exceeds the maximum URL size. Please download the selected targets and upload the file in the DAVID user interface.');
+                }
+                else {
+                    window.open(url, '_blank');
+                }
             }
         }
     });

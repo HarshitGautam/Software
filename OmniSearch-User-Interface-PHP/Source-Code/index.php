@@ -8,7 +8,7 @@
 	<title>OmniSearch</title>
 	
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
-	<link rel="stylesheet" href="/css/main.css" />
+	<link rel="stylesheet" href="/css/omnisearch.css" />
 	
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
@@ -18,7 +18,7 @@
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-	<script src="/js/main.js"></script>
+	<script src="/js/omnisearch.js"></script>
 </head>
 <body>
     <div style="display: table; margin: 0 auto">
@@ -178,6 +178,11 @@
 			</tbody>
 		</table>
 	</div>
-	<br/><br/>
+	<br/>
+    <div style="display: table; margin: 8px auto">
+        <b>References:</b><br/>
+        <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0100855" target="_blank">OMIT: Dynamic, Semi-Automated Ontology Development for the microRNA Domain</a><br/>
+        <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-2.pdf" target="_blank">A semantic approach for knowledge capture of microRNA-target gene interactions</a>
+    </div>
 </body>
 </html>

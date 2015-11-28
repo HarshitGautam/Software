@@ -52,28 +52,19 @@
         </div>
         <br />
         <p style="text-align: justify">
-            In this project, a reference ontology, ncRO, is also under development. ncRO stands
+            In this project, a reference ontology, NCRO, is also under development. NCRO stands
             for “Non-coding RNA Ontology” (pronounced as “an-ke-row”).
         </p>
         <br />
         <p style="text-align: justify">
-            ncRO aims to provide a common set of terms and relations
+            The NCRO ontology aims to provide a common set of terms and relations
             that will facilitate the curation, analysis, exchange, sharing, and management of
-            ncRNA data. If research groups around the world utilize ncRO to perform annotations
+            ncRNA data. If research groups around the world utilize the NCRO to perform annotations
             on their ncRNA data, it will significantly enhance comparative analysis of the wealth
             of information from disparate sources.
         </p>
         <br />
-        <p style="text-align: justify">The ncRO ontology files can be found on GitHub: </p>
-        <p>
-            <a href="https://github.com/OmniSearch/ncRO-Ontology-Files/blob/master/ncro-obo-WorkingVersion-06102015.obo"
-                target="_blank">https://github.com/OmniSearch/ncRO-Ontology-Files/blob/master/ncro-obo-WorkingVersion-06102015.obo</a>
-        </p>
-        <p>
-
-            <a href="https://github.com/OmniSearch/ncRO-Ontology-Files/blob/master/ncro-owl-WorkingVersion-06102015.owl"
-                target="_blank">https://github.com/OmniSearch/ncRO-Ontology-Files/blob/master/ncro-owl-WorkingVersion-06102015.owl</a>
-        </p>
-        <br />
+        <p style="text-align: justify">All files for the NCRO ontology can be found on the GitHub site: <a href="https://github.com/OmniSearch/ncro" target="_blank">The NCRO ontology files on the GitHub Website</a>.</p>
+      <br />
     </asp:Panel>
 </asp:Content>

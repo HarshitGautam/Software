@@ -27,6 +27,13 @@
 			<br/>
 			<br/>
 			<a href="http://omnisearch.soc.southalabama.edu:8080" target="_blank" style="font-size:27px"><b>Click here to enter the OmniSearch User Interface.</b></a>
+			
+			<br/><br/><br/><br/><br/><br/>
+			<div style="text-align:left">
+				<b>References:</b><br/><br/>
+				1. J. Huang, J. Dang, G.M. Borchert, K. Eilbeck, H. Zhang, M. Xiong, W. Jiang, H. Wu, J.A. Blake, D.A. Natale, and M. Tan, <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0100855" target="_blank">OMIT: Dynamic, Semi-Automated Ontology Development for the microRNA Domain</a>, PLOS ONE, 9(7): 1-16, e100855, July 2014 (doi:10.1371/journal.pone.0100855).<br/><br/>
+				2. J. Huang, F. Gutierrez, D. Dou, J.A. Blake, K. Eilbeck, D.A. Natale, B. Smith, Y. Lin, X. Wang, Z. Liu, M. Tan, and A. Ruttenberg, <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-2.pdf" target="_blank">A semantic approach for knowledge capture of microRNA-target gene interactions</a>, Proc. BHI Workshop at 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15), IEEE, Washington D.C., November 2015.
+			</div>
 		</div>
 	
 <!--

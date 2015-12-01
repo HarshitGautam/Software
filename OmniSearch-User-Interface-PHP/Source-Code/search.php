@@ -133,15 +133,15 @@ try {
                 '<td><input type="checkbox" name="targets[]" value="' . $target['symbol']['value'] . '" /></td>' .
                 '<td style="font-size: 125%; font-weight: bold">' . $target['symbol']['value'] . '</td>' .
                 '<td>' .
-                '<a href="http://mirdb.org/miRDB/" target="_blank">miRDB</a><br/>' .
-                '<a href="http://www.targetscan.org/" target="_blank">TargetScan</a><br/>' .
-                '<a href="http://www.microrna.org/" target="_blank">microRNA.org</a><br/>' .
+                '<a href="http://mirdb.org/cgi-bin/search.cgi?searchType=miRNA&searchBox=' . $mirna . '&full=1" target="_blank">miRDB</a><br/>' .
+                '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&mir_nc=' . $mirna . '" target="_blank">TargetScan</a><br/>' .
+                '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>' .
                 '</td><td>' .
                 '<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">All</a> (<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">15</a>)<br/>' .
                 '<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">' . $mirna . '-Specific</a> (<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">3</a>)<br/>' .
                 '</td><td>' .
-                '<a href="http://amigo.geneontology.org/amigo/" target="_blank">' . $target['symbol']['value'] . '</a> (<a href="http://amigo.geneontology.org/amigo/" target="_blank">1</a>)<br/>' .
-                '<a href="http://amigo.geneontology.org/amigo/" target="_blank">' . $mirna . '</a> (<a href="http://amigo.geneontology.org/amigo/" target="_blank">2</a>)<br/>' .
+                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['symbol']['value'] . '" target="_blank">' . $target['symbol']['value'] . '</a> (<a href="http://amigo.geneontology.org/amigo/" target="_blank">1</a>)<br/>' .
+                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $mirna . '" target="_blank">' . $mirna . '</a> (<a href="http://amigo.geneontology.org/amigo/" target="_blank">2</a>)<br/>' .
                 '</td></tr>';
         }
 

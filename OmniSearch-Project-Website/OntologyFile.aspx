@@ -79,12 +79,12 @@
 		<div style="text-align:left">
 			<b>References for OMIT:</b><br/><br/>
 			1. J. Huang, J. Dang, G.M. Borchert, K. Eilbeck, H. Zhang, M. Xiong, W. Jiang, H. Wu, J.A. Blake, D.A. Natale, and M. Tan, <a href="http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0100855" target="_blank">OMIT: Dynamic, Semi-Automated Ontology Development for the microRNA Domain</a>, PLOS ONE, 9(7): 1-16, e100855, July 2014 (doi:10.1371/journal.pone.0100855).<br/><br/>
-			2. J. Huang, F. Gutierrez, D. Dou, J.A. Blake, K. Eilbeck, D.A. Natale, B. Smith, Y. Lin, X. Wang, Z. Liu, M. Tan, and A. Ruttenberg, <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-2.pdf" target="_blank">A semantic approach for knowledge capture of microRNA-target gene interactions</a>, Proc. BHI Workshop at 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15), IEEE, Washington D.C., November 2015.
+			2. J. Huang, F. Gutierrez, D. Dou, J.A. Blake, K. Eilbeck, D.A. Natale, B. Smith, Y. Lin, X. Wang, Z. Liu, M. Tan, and A. Ruttenberg, <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-2.pdf" target="_blank">A semantic approach for knowledge capture of microRNA-target gene interactions</a>, Proc. BHI Workshop at 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15), pp. 975-982, IEEE, Washington D.C., November 2015.
 		</div>
 		<br/><br/>
 		<div style="text-align:left">
 			<b>References for NCRO:</b><br/><br/>
-			1. J. Huang, K. Eilbeck, J.A. Blake, D. Dou, D.A. Natale, A. Ruttenberg, B. Smith, M.T. Zimmermann, G. Jiang, Y. Lin, B. Wu, Y. He, S. Zhang, X. Wang, H. Zhang, Z. Liu, and M. Tan, <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-1.pdf" target="_blank">A domain ontology for the non-coding RNA field</a>, Proc. 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15), IEEE, Washington D.C., November 2015.
+			1. J. Huang, K. Eilbeck, J.A. Blake, D. Dou, D.A. Natale, A. Ruttenberg, B. Smith, M.T. Zimmermann, G. Jiang, Y. Lin, B. Wu, Y. He, S. Zhang, X. Wang, H. Zhang, Z. Liu, and M. Tan, <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-1.pdf" target="_blank">A domain ontology for the non-coding RNA field</a>, Proc. 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15), pp. 621-624, IEEE, Washington D.C., November 2015.
 		</div>
 		
     </asp:Panel>

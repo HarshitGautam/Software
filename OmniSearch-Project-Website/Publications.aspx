@@ -7,7 +7,7 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <asp:Panel ID="Panel1" runat="server" CssClass="content">
         <p style="text-align: justify">
-             J. Huang, K. Eilbeck, J.A. Blake, D. Dou, D.A. Natale, A. Ruttenberg, B. Smith, M.T. Zimmermann, G. Jiang, Y. Lin, B. Wu, Y. He, S. Zhang, X. Wang, H. Zhang, Z. Liu, and M. Tan, “A domain ontology for the non-coding RNA field,” <em>Proc. 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15)</em>, IEEE, Washington D.C., Nov. 2015.
+             J. Huang, K. Eilbeck, J.A. Blake, D. Dou, D.A. Natale, A. Ruttenberg, B. Smith, M.T. Zimmermann, G. Jiang, Y. Lin, B. Wu, Y. He, S. Zhang, X. Wang, H. Zhang, Z. Liu, and M. Tan, “A domain ontology for the non-coding RNA field,” <em>Proc. 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15)</em>, pp. 621-624, IEEE, Washington D.C., Nov. 2015.
         <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-1.pdf"" target="_blank"
         style="color: Blue">[PDF]
     </a>
@@ -18,7 +18,7 @@
         </div>
         <br />
         <p style="text-align: justify">
-            J. Huang, F. Gutierrez, D. Dou, J.A. Blake, K. Eilbeck, D.A. Natale, B. Smith, Y. Lin, X. Wang, Z. Liu, M. Tan, and A. Ruttenberg, “A semantic approach for knowledge capture of microRNA-target gene interactions,” <em>&nbsp;Proc. BHI Workshop at 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15)</em>, IEEE, Washington D.C., Nov. 2015.
+            J. Huang, F. Gutierrez, D. Dou, J.A. Blake, K. Eilbeck, D.A. Natale, B. Smith, Y. Lin, X. Wang, Z. Liu, M. Tan, and A. Ruttenberg, “A semantic approach for knowledge capture of microRNA-target gene interactions,” <em>&nbsp;Proc. BHI Workshop at 2015 IEEE International Conference on Bioinformatics and Biomedicine (BIBM-15)</em>, pp. 975-982, IEEE, Washington D.C., Nov. 2015.
         
              <a href="http://soc.southalabama.edu/~huang/papers/BIBM-15-2.pdf"" target="_blank"
         style="color: Blue">[PDF]

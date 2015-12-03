@@ -68,7 +68,7 @@
                         </td>
                         <td>
                             <div id="term_searchbox" class="searchbox">
-                                <input id="term_searchbox_input" type="text" class="form-control" autocomplete="off" required />
+                                <input id="term_searchbox_input" type="text" class="form-control" autocomplete="off" />
                                 <div id="term_searchbox_div"></div>
                             </div>
                         </td>
@@ -160,7 +160,15 @@
 			<thead>
 				<tr>
 					<th width="10%" rowspan="2"><label for="select_all_cb">Select All Targets<input id="select_all_cb" type="checkbox" autocomplete="off" disabled /></label></th>
-					<th width="10%" rowspan="2">Candidate Targets</th>
+					<th width="10%" rowspan="2">
+                        Candidate Targets<br/><br/>
+                        Sort Targets by Score<br/>
+                        <select id="target_score_select" class="form-control" autocomplete="off">
+                            <option value="mirdb" selected>miRDB</option>
+                            <option value="targetscan">TargetScan</option>
+                            <option value="miranda">miRanda</option>
+                        </select>
+                    </th>
 					<th width="10%" rowspan="2">Predicted By</th>
 					<th width="30%" colspan="2">Evidence</th>
 				</tr>

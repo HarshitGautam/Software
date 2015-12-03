@@ -34,7 +34,7 @@ try {
         '?parent rdfs:label ' . ($is_mirna ? '"human_miRNA"' : '"phenotype"') . ' . ' .
         '?child rdfs:subClassOf ?parent . ' .
         '?child rdfs:label ?label ' .
-        'FILTER REGEX(LCASE(?label), "' . ($is_mirna ? $mirna : $term) . '") ' .
+        'FILTER REGEX(LCASE(?label), LCASE("' . ($is_mirna ? $mirna : $term) . '")) ' .
         '} ORDER BY ?label';
 
     // Build the query url

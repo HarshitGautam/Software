@@ -338,7 +338,7 @@ function mirna_query(focus) {
 
     $('#mirna_searchbox_div').html('<h5>Searching...</h5>').show();
 
-    $.get('/query.php', { mirna: $('#mirna_searchbox_input').val().toLowerCase().trim() })
+    $.get('/query.php', { mirna: $('#mirna_searchbox_input').val().trim() })
         .done(function(data) {
             $('#mirna_searchbox_div').html(data);
             setTimeout(function () {
@@ -357,7 +357,7 @@ function term_query(focus) {
 
     $('#term_searchbox_div').html('<h5>Searching...</h5>').show();
 
-    $.get('/query.php', { term: $('#term_searchbox_input').val().toLowerCase().trim() })
+    $.get('/query.php', { term: $('#term_searchbox_input').val().trim() })
         .done(function(data) {
             $('#term_searchbox_div').html(data);
             setTimeout(function () {
@@ -372,13 +372,8 @@ function term_query(focus) {
 }
 
 function search() {
-    if(!$('#search_form')[0].checkValidity()) {
-        alert('not valid');
-        return false;
-    }
-
-    mirna = $('#mirna_searchbox_input').val().toLowerCase().trim();
-    term = $('#term_searchbox_input').val().toLowerCase().trim();
+    mirna = $('#mirna_searchbox_input').val().trim();
+    term = $('#term_searchbox_input').val().trim();
     limit = $('#limit_select').val();
 
     $('input, button, select').prop('disabled', true);
@@ -418,6 +413,7 @@ function search() {
                     $('#clear_results_btn').prop('disabled', false);
                     $('#limit_select').prop('disabled', false);
                     $('#select_all_cb').prop('disabled', false);
+                    $('#target_score_select').prop('disabled', false);
                 }
                 $('#select_all_cb').prop('disabled', false);
             }
@@ -425,8 +421,8 @@ function search() {
                 $('#results_body').html('<tr><td colspan="5"><h4>No results found</h4></td></tr>');
             }
         })
-        .fail(function() {
-            window.open('/error.php');
+        .fail(function(request, status, error) {
+            window.location.href = "/error.php";
         })
         .always(function() {
             $('#search_controls').find('input, button, select').prop('disabled', false);

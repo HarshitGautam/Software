@@ -10,7 +10,7 @@ date_default_timezone_set('America/New_York');
 header('Content-Type: application/json');
 
 // If the type, mirna or term query parameters were not supplied
-if(empty($_GET['type']) || empty($_GET['mirna']) || empty($_GET['term'])) {
+if(empty($_GET['type']) || empty($_GET['mirna'])) {
     // Navigate to the error page
     header('Location: /error.php');
     exit;
@@ -21,7 +21,11 @@ try {
     // Store the required query string parameters
     $type = $_GET['type'];
     $mirna = $_GET['mirna'];
-    $term = $_GET['term'];
+
+    if(!empty($_GET['term']))
+        $term = $_GET['term'];
+    else
+        $term = '';
 
     // Set the request header options to accept sparql-results+json
     $options = array('http' => array('method' => "GET", 'header' => "Accept: application/sparql-results+json\r\n"));
@@ -47,7 +51,7 @@ try {
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
             'SELECT (COUNT(?symbol) AS ?count) ' .
             'WHERE { ' .
-            '?parent rdfs:label ?mirna FILTER REGEX(LCASE(?mirna), "' . $mirna . '") . ' .
+            '?parent rdfs:label "' . $mirna . '" . ' .
             '?parent ncro:_has_predicted_target ?child . ' .
             '?child rdfs:label ?symbol ' .
             '}';
@@ -99,7 +103,7 @@ try {
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
             'SELECT ?symbol ' .
             'WHERE { ' .
-            '?parent rdfs:label ?mirna FILTER REGEX(LCASE(?mirna), "' . $mirna . '") . ' .
+            '?parent rdfs:label "' . $mirna . '" . ' .
             '?parent ncro:_has_predicted_target ?child . ' .
             '?child rdfs:label ?symbol ' .
             '} ' .
@@ -140,8 +144,8 @@ try {
                 '<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">All</a> (<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">15</a>)<br/>' .
                 '<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">' . $mirna . '-Specific</a> (<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">3</a>)<br/>' .
                 '</td><td>' .
-                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['symbol']['value'] . '" target="_blank">' . $target['symbol']['value'] . '</a> (<a href="http://amigo.geneontology.org/amigo/" target="_blank">1</a>)<br/>' .
-                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $mirna . '" target="_blank">' . $mirna . '</a> (<a href="http://amigo.geneontology.org/amigo/" target="_blank">2</a>)<br/>' .
+                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['symbol']['value'] . '" target="_blank">' . $target['symbol']['value'] . '</a><br/>' .
+                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $mirna . '" target="_blank">' . $mirna . '</a><br/>' .
                 '</td></tr>';
         }
 
@@ -164,7 +168,7 @@ try {
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
             'SELECT ?symbol ' .
             'WHERE { ' .
-            '?parent rdfs:label ?mirna FILTER REGEX(LCASE(?mirna), "' . $mirna . '") . ' .
+            '?parent rdfs:label "' . $mirna . '" . ' .
             '?parent ncro:_has_predicted_target ?child . ' .
             '?child rdfs:label ?symbol ' .
             '}';
@@ -214,7 +218,7 @@ try {
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
             'SELECT ?symbol ' .
             'WHERE { ' .
-            '?parent rdfs:label ?mirna FILTER REGEX(LCASE(?mirna), "' . $mirna . '") . ' .
+            '?parent rdfs:label "' . $mirna . '" . ' .
             '?parent ncro:_has_predicted_target ?child . ' .
             '?child rdfs:label ?symbol ' .
             '}';
@@ -320,7 +324,7 @@ catch(Exception $ex) {
     error_log($ex);
 
     // Inform the user that the store is unavailable
-    echo '<h5>OmniStore Unavailable</h5>';
+    echo $ex;
     exit;
 }
 

@@ -162,7 +162,7 @@
 					<th width="10%" rowspan="2"><label for="select_all_cb">Select All Targets<input id="select_all_cb" type="checkbox" autocomplete="off" disabled /></label></th>
 					<th width="10%" rowspan="2">
                         Candidate Targets<br/><br/>
-                        Sort Targets by Score<br/>
+                        Sort by Score<br/>
                         <select id="target_score_select" class="form-control" autocomplete="off">
                             <option value="mirdb" selected>miRDB</option>
                             <option value="targetscan">TargetScan</option>

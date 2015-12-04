@@ -398,6 +398,11 @@ function search() {
                     });
                 }, 50);
 
+                if(page_count == 0) {
+                    $('#page_count_lbl').text('0');
+                    $('#page_lbl').text('0');
+                }
+
                 if(page_count > 1) {
                     if(page != 1) {
                         $('#first_btn').prop('disabled', false);

@@ -54,6 +54,7 @@ try {
                 '?mirna rdfs:label "' . $mirna . '" . ' .
                 '?mirna ncro:_has_predicted_target ?target . ' .
                 '?target rdfs:label ?label . ' .
+                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
                 'OPTIONAL { ' .
                     '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
                     'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
@@ -113,11 +114,12 @@ try {
         // Build the query string
         $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT ?label ?mirdb ?targetscan ?miranda ' .
+            'SELECT ?label ?geneid ?mirdb ?targetscan ?miranda ' .
             'WHERE { ' .
                 '?mirna rdfs:label "' . $mirna . '" . ' .
                 '?mirna ncro:_has_predicted_target ?target . ' .
                 '?target rdfs:label ?label . ' .
+                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
                 'OPTIONAL { ' .
                     '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
                     'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
@@ -173,8 +175,7 @@ try {
             }
 
             $html .= '</td><td>' .
-                '<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">All</a> (<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">15</a>)<br/>' .
-                '<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">' . $mirna . '-Specific</a> (<a href="http://www.ncbi.nlm.nih.gov/pubmed" target="_blank">3</a>)<br/>' .
+                '<a href="http://www.ncbi.nlm.nih.gov/pubmed?LinkName=gene_pubmed&from_uid=' . $target['geneid']['value'] . '" target="_blank">All</a><br/>' .
                 '</td><td>' .
                 '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['label']['value'] . '" target="_blank">' . $target['label']['value'] . '</a><br/>' .
                 '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $mirna . '" target="_blank">' . $mirna . '</a><br/>' .
@@ -198,11 +199,12 @@ try {
         // Build the query string
         $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT ?label ?mirdb ?targetscan ?miranda ' .
+            'SELECT ?label ?geneid ?mirdb ?targetscan ?miranda ' .
             'WHERE { ' .
                 '?mirna rdfs:label "' . $mirna . '" . ' .
                 '?mirna ncro:_has_predicted_target ?target . ' .
                 '?target rdfs:label ?label . ' .
+                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
                 'OPTIONAL { ' .
                     '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
                     'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
@@ -260,11 +262,12 @@ try {
         // Build the query string
         $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT ?label ?mirdb ?targetscan ?miranda ' .
+            'SELECT ?label ?geneid ?mirdb ?targetscan ?miranda ' .
             'WHERE { ' .
                 '?mirna rdfs:label "' . $mirna . '" . ' .
                 '?mirna ncro:_has_predicted_target ?target . ' .
                 '?target rdfs:label ?label . ' .
+                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
                 'OPTIONAL { ' .
                     '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
                     'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .

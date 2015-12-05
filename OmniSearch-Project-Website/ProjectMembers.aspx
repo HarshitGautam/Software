@@ -34,7 +34,7 @@
                             Jingshan Huang</b> </a>
                     </p>
                     <p>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Assistant Professor
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Associate Professor
                     </p>
                     <p>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; School of Computing

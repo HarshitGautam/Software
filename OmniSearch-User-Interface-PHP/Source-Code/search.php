@@ -21,11 +21,19 @@ try {
     // Store the required query string parameters
     $type = $_GET['type'];
     $mirna = $_GET['mirna'];
+    $sortby = $_GET['sortby'];
 
     if(!empty($_GET['term']))
         $term = $_GET['term'];
     else
         $term = '';
+
+    if($sortby == 'mirdb')
+        $sortby = '?s_m';
+    else if($sortby == 'targetscan')
+        $sortby = '?s_t';
+    else
+        $sortby = '?s_m';
 
     // Set the request header options to accept sparql-results+json
     $options = array('http' => array('method' => "GET", 'header' => "Accept: application/sparql-results+json\r\n"));
@@ -47,27 +55,28 @@ try {
         $page = $_GET['page'];
 
         // Build the COUNT query string
-        $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
-            'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT (COUNT(?label) AS ?count) ' .
+        $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
+            'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+            'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
+            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
+            'SELECT ?l ?i (GROUP_CONCAT(IF(BOUND(?m_s), ?m_s, ""); SEPARATOR="") AS ?s_m) (GROUP_CONCAT(IF(BOUND(?t_s), ?t_s, ""); SEPARATOR="") AS ?s_t) ' .
             'WHERE { ' .
-                '?mirna rdfs:label "' . $mirna . '" . ' .
-                '?mirna ncro:_has_predicted_target ?target . ' .
-                '?target rdfs:label ?label . ' .
-                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
-                'OPTIONAL { ' .
-                    '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?targetscan <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?targetscan = <http://purl.obolibrary.org/obo/OMIT_0000019>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?miranda <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?miranda = <http://purl.obolibrary.org/obo/OMIT_0000021>) ' .
-                '} ' .
-            '}';
+            '?mirna rdfs:label "hsa-miR-125b-5p" . ' .
+            '?p obo:RO_0000057 ?mirna . ' .
+            '?p obo:RO_0000057 ?t . ' .
+            'FILTER (?t != ?mirna) . ' .
+            '?t rdfs:label ?l . ' .
+            '?t obo:OMIT_0000109 ?i . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000020 . ' .
+            '?p obo:OMIT_0000108 ?m_s ' .
+            '} . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000019 . ' .
+            '?p obo:OMIT_0000108 ?t_s ' .
+            '} ' .
+            '} ' .
+            'GROUP BY ?l ?i';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -87,7 +96,7 @@ try {
         }
 
         // Store the target count
-        $count = $json['results']['bindings'][0]['count']['value'];
+        $count = count($json['results']['bindings']);
 
         // If the count is zero
         if ($count <= 0) {
@@ -112,27 +121,29 @@ try {
         }
 
         // Build the query string
-        $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
-            'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT ?label ?geneid ?mirdb ?targetscan ?miranda ' .
+        $query =  'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
+            'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+            'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
+            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
+            'SELECT ?l ?i (GROUP_CONCAT(IF(BOUND(?m_s), ?m_s, ""); SEPARATOR="") AS ?s_m) (GROUP_CONCAT(IF(BOUND(?t_s), ?t_s, ""); SEPARATOR="") AS ?s_t) ' .
             'WHERE { ' .
-                '?mirna rdfs:label "' . $mirna . '" . ' .
-                '?mirna ncro:_has_predicted_target ?target . ' .
-                '?target rdfs:label ?label . ' .
-                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
-                'OPTIONAL { ' .
-                    '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?targetscan <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?targetscan = <http://purl.obolibrary.org/obo/OMIT_0000019>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?miranda <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?miranda = <http://purl.obolibrary.org/obo/OMIT_0000021>) ' .
-                '} ' .
+            '?mirna rdfs:label "hsa-miR-125b-5p" . ' .
+            '?p obo:RO_0000057 ?mirna . ' .
+            '?p obo:RO_0000057 ?t . ' .
+            'FILTER (?t != ?mirna) . ' .
+            '?t rdfs:label ?l . ' .
+            '?t obo:OMIT_0000109 ?i . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000020 . ' .
+            '?p obo:OMIT_0000108 ?m_s ' .
+            '} . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000019 . ' .
+            '?p obo:OMIT_0000108 ?t_s ' .
             '} ' .
+            '} ' .
+            'GROUP BY ?l ?i ' .
+            'ORDER BY DESC(' . $sortby . ')'.
             ($limit === 'All' ? '' : 'LIMIT ' . $limit . ' OFFSET ' . $offset);
 
 
@@ -158,26 +169,30 @@ try {
 
         // Loop through each target
         foreach ($json['results']['bindings'] as $target) {
+            if(empty($target['s_m']['value']) && empty($target['s_t']['value'])) {
+                continue;
+            }
+
             // Concatenate the target row information
             $html .= '<tr>' .
-                '<td><input type="checkbox" name="targets[]" value="' . $target['label']['value'] . '" /></td>' .
-                '<td style="font-size: 125%; font-weight: bold">' . $target['label']['value'] . '</td>' .
+                '<td><input type="checkbox" name="targets[]" value="' . $target['l']['value'] . '" /></td>' .
+                '<td style="font-size: 125%; font-weight: bold">' . $target['l']['value'] . '</td>' .
                 '<td>';
 
-            if(isset($target['mirdb'])) {
+            if(!empty($target['s_m']['value'])) {
                 $html .= '<a href="http://mirdb.org/cgi-bin/search.cgi?searchType=miRNA&searchBox=' . $mirna . '&full=1" target="_blank">miRDB</a><br/>';
             }
-            if(isset($target['targetscan'])) {
+            if(!empty($target['s_t']['value'])) {
                 $html .= '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=' . str_replace('hsa-', '', $mirna) . '" target="_blank">TargetScan</a><br/>';
             }
-            if(isset($target['miranda'])) {
-                $html .= '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>';
-            }
+            //if(strpos($target['types']['value'], 'http://purl.obolibrary.org/obo/OMIT_0000021')) {
+            //    $html .= '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>';
+            //}
 
             $html .= '</td><td>' .
-                '<a href="http://www.ncbi.nlm.nih.gov/pubmed?LinkName=gene_pubmed&from_uid=' . $target['geneid']['value'] . '" target="_blank">All</a><br/>' .
+                '<a href="http://www.ncbi.nlm.nih.gov/pubmed?LinkName=gene_pubmed&from_uid=' . $target['i']['value'] . '" target="_blank">All</a><br/>' .
                 '</td><td>' .
-                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['label']['value'] . '" target="_blank">' . $target['label']['value'] . '</a><br/>' .
+                '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['l']['value'] . '" target="_blank">' . $target['l']['value'] . '</a><br/>' .
                 '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $mirna . '" target="_blank">' . $mirna . '</a><br/>' .
                 '</td></tr>';
         }
@@ -197,27 +212,28 @@ try {
     // Else if all targets are requested
     else if ($type === 'all-targets') {
         // Build the query string
-        $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
-            'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT ?label ?geneid ?mirdb ?targetscan ?miranda ' .
+        $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
+            'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+            'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
+            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
+            'SELECT ?l ?i (GROUP_CONCAT(IF(BOUND(?m_s), ?m_s, ""); SEPARATOR="") AS ?s_m) (GROUP_CONCAT(IF(BOUND(?t_s), ?t_s, ""); SEPARATOR="") AS ?s_t) ' .
             'WHERE { ' .
-                '?mirna rdfs:label "' . $mirna . '" . ' .
-                '?mirna ncro:_has_predicted_target ?target . ' .
-                '?target rdfs:label ?label . ' .
-                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
-                'OPTIONAL { ' .
-                    '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?targetscan <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?targetscan = <http://purl.obolibrary.org/obo/OMIT_0000019>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?miranda <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?miranda = <http://purl.obolibrary.org/obo/OMIT_0000021>) ' .
-                '} ' .
-            '}';
+            '?mirna rdfs:label "hsa-miR-125b-5p" . ' .
+            '?p obo:RO_0000057 ?mirna . ' .
+            '?p obo:RO_0000057 ?t . ' .
+            'FILTER (?t != ?mirna) . ' .
+            '?t rdfs:label ?l . ' .
+            '?t obo:OMIT_0000109 ?i . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000020 . ' .
+            '?p obo:OMIT_0000108 ?m_s ' .
+            '} . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000019 . ' .
+            '?p obo:OMIT_0000108 ?t_s ' .
+            '} ' .
+            '} ' .
+            'GROUP BY ?l ?i';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -242,7 +258,7 @@ try {
         // Loop through each target
         foreach ($json['results']['bindings'] as $target) {
             // Add the target string to the array
-            $targets[] = $target['label']['value'];
+            $targets[] = $target['l']['value'];
         }
 
         // Echo the target array
@@ -260,27 +276,28 @@ try {
         $format = $_GET['format'];
 
         // Build the query string
-        $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
-            'prefix ncro: <http://purl.obolibrary.org/obo/ncro#> ' .
-            'SELECT ?label ?geneid ?mirdb ?targetscan ?miranda ' .
+        $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
+            'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+            'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
+            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
+            'SELECT ?l ?i (GROUP_CONCAT(IF(BOUND(?m_s), ?m_s, ""); SEPARATOR="") AS ?s_m) (GROUP_CONCAT(IF(BOUND(?t_s), ?t_s, ""); SEPARATOR="") AS ?s_t) ' .
             'WHERE { ' .
-                '?mirna rdfs:label "' . $mirna . '" . ' .
-                '?mirna ncro:_has_predicted_target ?target . ' .
-                '?target rdfs:label ?label . ' .
-                '?target <http://purl.obolibrary.org/obo/OMIT_0000095> ?geneid .' .
-                'OPTIONAL { ' .
-                    '?mirdb <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?mirdb = <http://purl.obolibrary.org/obo/OMIT_0000020>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?targetscan <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?targetscan = <http://purl.obolibrary.org/obo/OMIT_0000019>) ' .
-                '} ' .
-                'OPTIONAL { ' .
-                    '?miranda <http://purl.obolibrary.org/obo/RO_0000057> ?target . ' .
-                    'FILTER (?miranda = <http://purl.obolibrary.org/obo/OMIT_0000021>) ' .
-                '} ' .
-            '}';
+            '?mirna rdfs:label "hsa-miR-125b-5p" . ' .
+            '?p obo:RO_0000057 ?mirna . ' .
+            '?p obo:RO_0000057 ?t . ' .
+            'FILTER (?t != ?mirna) . ' .
+            '?t rdfs:label ?l . ' .
+            '?t obo:OMIT_0000109 ?i . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000020 . ' .
+            '?p obo:OMIT_0000108 ?m_s ' .
+            '} . ' .
+            'OPTIONAL { ' .
+            '?p rdf:type obo:OMIT_0000019 . ' .
+            '?p obo:OMIT_0000108 ?t_s ' .
+            '} ' .
+            '} ' .
+            'GROUP BY ?l ?i';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -309,11 +326,11 @@ try {
                 // If tab-separated values
                 if ($format === 'tsv')
                     // Concatenate the target information
-                    $text .= $target['label']['value'] . "\tmiRDB\t\tAll\t\t\t" . $target['label']['value'] . "\r\n\tTargetScan\t" . $mirna . "-Specific\tmRNA\r\n\tmicroRNA.org\r\n";
+                    $text .= $target['l']['value'] . "\tmiRDB\t\tAll\t\t\t" . $target['l']['value'] . "\r\n\tTargetScan\t" . $mirna . "-Specific\tmRNA\r\n\tmicroRNA.org\r\n";
                 // Else if comma-separated values
                 else if ($format === 'csv')
                     // Concatenate the target information
-                    $text .= $target['label']['value'] . ",\"miRDB\r\nTargetScan\r\nmicroRNA.org\",\"All\r\n" . $mirna . "-Specific\",\"" . $target['label']['value'] . "\r\nmRNA\"\r\n";
+                    $text .= $target['l']['value'] . ",\"miRDB\r\nTargetScan\r\nmicroRNA.org\",\"All\r\n" . $mirna . "-Specific\",\"" . $target['l']['value'] . "\r\nmRNA\"\r\n";
             }
 
             // Save tsv file with .txt extension
@@ -342,7 +359,7 @@ try {
                 // Loop through all targets
                 foreach ($json['results']['bindings'] as $target) {
                     // Concatenate the target label
-                    $text .= $target['label']['value'] . "\r\n";
+                    $text .= $target['l']['value'] . "\r\n";
                 }
             }
             // Else
@@ -355,9 +372,9 @@ try {
                 // Loop through each target label
                 foreach ($json['results']['bindings'] as $target) {
                     // If the count is zero or the current target is in the selected targets array
-                    if ($select_count > 0 && in_array($target['label']['value'], $selected, true)) {
+                    if ($select_count > 0 && in_array($target['l']['value'], $selected, true)) {
                         // Concatenate the target label
-                        $text .= $target['label']['value'] . "\r\n";
+                        $text .= $target['l']['value'] . "\r\n";
                     }
                 }
             }

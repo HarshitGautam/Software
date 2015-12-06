@@ -7,6 +7,7 @@ var target_count = 0;
 var downloaded = false;
 var mirna_open = false;
 var term_open = false;
+var sortby = 'mirdb';
 var selected = [];
 
 Array.prototype.remove = function(v) { this.splice(this.indexOf(v) == -1 ? this.length : this.indexOf(v), 1); }
@@ -195,6 +196,10 @@ $(document).ready(function() {
         search();
     });
 
+    $('#target_score_select').on('change', function() {
+       search();
+    });
+
     $('#limit_select').on('change', function() {
         search();
     });
@@ -261,6 +266,7 @@ $(document).ready(function() {
         page = 1;
         page_count = 1;
         target_count = 0;
+        downloaded = false;
     });
 
     $('#download_results').find('input[name=amount]').on('change', function() {
@@ -375,10 +381,11 @@ function search() {
     mirna = $('#mirna_searchbox_input').val().trim();
     term = $('#term_searchbox_input').val().trim();
     limit = $('#limit_select').val();
+    sortby = $('#target_score_select').find(':selected').val();
 
     $('input, button, select').prop('disabled', true);
 
-    $.getJSON('/search.php', { type: 'search', mirna: mirna, term: term, page: page, limit: limit })
+    $.getJSON('/search.php', { type: 'search', mirna: mirna, term: term, sortby: sortby, page: page, limit: limit })
         .done(function(data) {
             if(data.success) {
                 page = data.page;

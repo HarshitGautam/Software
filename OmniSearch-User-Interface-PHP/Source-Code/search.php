@@ -6,9 +6,6 @@ error_reporting(0);
 // Set the date timezone
 date_default_timezone_set('America/New_York');
 
-// Set the header content type to json
-header('Content-Type: application/json');
-
 // If the type, mirna or term query parameters were not supplied
 if(empty($_GET['type']) || empty($_GET['mirna'])) {
     // Navigate to the error page
@@ -27,13 +24,6 @@ try {
         $term = $_GET['term'];
     else
         $term = '';
-
-    if($sortby == 'mirdb')
-        $sortby = '?s_m';
-    else if($sortby == 'targetscan')
-        $sortby = '?s_t';
-    else
-        $sortby = '?s_m';
 
     // Set the request header options to accept sparql-results+json
     $options = array('http' => array('method' => "GET", 'header' => "Accept: application/sparql-results+json\r\n"));
@@ -58,17 +48,18 @@ try {
         $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
-            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
-            'SELECT ?prediction ?gene_symbol ?gene_id ' .
-            '(MAX(?mdb_score) AS ?mirdb_score) ' .
-            '(MAX(?ts_score) AS ?targetscan_score) ' .
+            'SELECT ?gene_symbol ' .
+            '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
+            '?target rdf:type obo:NCRO_0000025 . ' .
             '?target rdfs:label ?gene_symbol . ' .
-            '?target obo:OMIT_0000109 ?gene_id . ' .
+            '?target obo:OMIT_0000109 ?g_id . ' .
             'OPTIONAL { ' .
             '?prediction rdf:type obo:OMIT_0000020 . ' .
             '?prediction obo:OMIT_0000108 ?mdb_score ' .
@@ -83,15 +74,14 @@ try {
             '?pmed_info obo:OMIT_0000150 "' . strtolower($term) . '" . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
-            'FILTER (?target != ?mirna) ' .
             '} ' .
-            'GROUP BY ?prediction ?gene_symbol ?gene_id ';
+            'GROUP BY ?gene_symbol ';
 
         if($sortby == 'mirdb') {
             $query .= 'ORDER BY DESC(?mirdb_score) DESC(?targetscan_score)';
         }
         else if($sortby == 'targetscan') {
-            $query .= 'DESC(?targetscan_score) ORDER BY DESC(?mirdb_score)';
+            $query .= 'ORDER BY DESC(?targetscan_score) DESC(?mirdb_score)';
         }
         else {
             $query .= 'ORDER BY DESC(?mirdb_score) DESC(?targetscan_score)';
@@ -119,6 +109,9 @@ try {
 
         // If the count is zero
         if ($count == 0 || $json['results']['bindings'][0] == null) {
+            // Set the header content type to json
+            header('Content-Type: application/json');
+
             // Return false to the ajax request
             echo json_encode(array('result' => false));
             exit;
@@ -171,10 +164,10 @@ try {
                 '<td style="font-size: 125%; font-weight: bold">' . $target['gene_symbol']['value'] . '</td>' .
                 '<td>';
 
-            if(!empty($target['mirdb_score']['value'])) {
+            if(isset($target['mirdb_score']['value'])) {
                 $html .= '<a href="http://mirdb.org/cgi-bin/search.cgi?searchType=miRNA&searchBox=' . $mirna . '&full=1" target="_blank">miRDB</a><br/>';
             }
-            if(!empty($target['targetscan_score']['value'])) {
+            if(isset($target['targetscan_score']['value'])) {
                 $html .= '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=' . str_replace('hsa-', '', $mirna) . '" target="_blank">TargetScan</a><br/>';
             }
             //if(!empty($target['miranda_score']['value'])) {
@@ -197,6 +190,9 @@ try {
                 '</td></tr>';
         }
 
+        // Set the header content type to json
+        header('Content-Type: application/json');
+
         // Echo the results
         echo json_encode(array(
             'success' => true,
@@ -216,17 +212,18 @@ try {
         $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
-            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
-            'SELECT ?prediction ?gene_symbol ?gene_id ' .
-            '(MAX(?mdb_score) AS ?mirdb_score) ' .
-            '(MAX(?ts_score) AS ?targetscan_score) ' .
+            'SELECT ?gene_symbol ' .
+            '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
+            '?target rdf:type obo:NCRO_0000025 . ' .
             '?target rdfs:label ?gene_symbol . ' .
-            '?target obo:OMIT_0000109 ?gene_id . ' .
+            '?target obo:OMIT_0000109 ?g_id . ' .
             'OPTIONAL { ' .
             '?prediction rdf:type obo:OMIT_0000020 . ' .
             '?prediction obo:OMIT_0000108 ?mdb_score ' .
@@ -241,9 +238,8 @@ try {
             '?pmed_info obo:OMIT_0000150 "' . strtolower($term) . '" . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
-            'FILTER (?target != ?mirna) ' .
             '} ' .
-            'GROUP BY ?prediction ?gene_symbol ?gene_id ';
+            'GROUP BY ?gene_symbol ';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -271,6 +267,9 @@ try {
             $targets[] = $target['gene_symbol']['value'];
         }
 
+        // Set the header content type to json
+        header('Content-Type: application/json');
+
         // Echo the target array
         echo json_encode(array('targets' => $targets));
     }
@@ -290,17 +289,18 @@ try {
         $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
-            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
-            'SELECT ?prediction ?gene_symbol ?gene_id ' .
-            '(MAX(?mdb_score) AS ?mirdb_score) ' .
-            '(MAX(?ts_score) AS ?targetscan_score) ' .
+            'SELECT ?gene_symbol ' .
+            '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
+            '?target rdf:type obo:NCRO_0000025 . ' .
             '?target rdfs:label ?gene_symbol . ' .
-            '?target obo:OMIT_0000109 ?gene_id . ' .
+            '?target obo:OMIT_0000109 ?g_id . ' .
             'OPTIONAL { ' .
             '?prediction rdf:type obo:OMIT_0000020 . ' .
             '?prediction obo:OMIT_0000108 ?mdb_score ' .
@@ -315,9 +315,8 @@ try {
             '?pmed_info obo:OMIT_0000150 "' . strtolower($term) . '" . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
-            'FILTER (?target != ?mirna) ' .
             '} ' .
-            'GROUP BY ?prediction ?gene_symbol ?gene_id ';
+            'GROUP BY ?gene_symbol ';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);

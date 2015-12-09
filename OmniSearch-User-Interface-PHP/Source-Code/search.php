@@ -50,8 +50,8 @@ try {
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
             'SELECT ?gene_symbol ' .
             '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
-            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
-            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, -1)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, -1)) AS ?targetscan_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
@@ -164,10 +164,10 @@ try {
                 '<td style="font-size: 125%; font-weight: bold">' . $target['gene_symbol']['value'] . '</td>' .
                 '<td>';
 
-            if(isset($target['mirdb_score']['value'])) {
+            if(isset($target['mirdb_score']['value']) && $target['mirdb_score']['value'] >= 0) {
                 $html .= '<a href="http://mirdb.org/cgi-bin/search.cgi?searchType=miRNA&searchBox=' . $mirna . '&full=1" target="_blank">miRDB</a><br/>';
             }
-            if(isset($target['targetscan_score']['value'])) {
+            if(isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] >= 0) {
                 $html .= '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=' . str_replace('hsa-', '', $mirna) . '" target="_blank">TargetScan</a><br/>';
             }
             //if(!empty($target['miranda_score']['value'])) {

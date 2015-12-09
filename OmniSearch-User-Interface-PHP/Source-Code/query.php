@@ -31,7 +31,7 @@ try {
     $query = 'prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
         'SELECT ?label ' .
         'WHERE { ' .
-        '?parent rdfs:label ' . ($is_mirna ? '"human_miRNA"' : '"phenotype"') . ' . ' .
+        '?parent rdfs:label ' . ($is_mirna ? '"human_miRNA"' : '"MeSH_term"') . ' . ' .
         '?child rdfs:subClassOf ?parent . ' .
         '?child rdfs:label ?label ' .
         'FILTER REGEX(LCASE(?label), LCASE("' . ($is_mirna ? $mirna : $term) . '")) ' .

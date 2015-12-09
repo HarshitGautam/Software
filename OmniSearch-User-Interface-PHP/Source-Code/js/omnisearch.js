@@ -104,8 +104,7 @@ $(document).ready(function() {
 
     $('#term_searchbox_input')
         .on('input', function() {
-            if(term_open)
-                term_query(false);
+            term_query(false);
         })
         .on('dblclick', function() {
             if($('#term_searchbox_div').is(':hidden'))
@@ -132,7 +131,8 @@ $(document).ready(function() {
 
     $('#term_searchbox_div')
         .on('mousemove', 'p', function() {
-            $(this).focus();
+            if(mirna_open)
+                $(this).focus();
         })
         .on('click', 'p', function() {
             $('#term_searchbox_input').val($(this).text()).focus();

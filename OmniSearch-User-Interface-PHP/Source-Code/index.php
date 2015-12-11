@@ -109,7 +109,7 @@
                     <button id="prev_btn" type="button" class="btn btn-default" style="margin-bottom: 0; border-radius: 0" autocomplete="off" disabled>&lsaquo;</button>
                 </td>
                 <td>
-                    <label class="form-control" style="margin-bottom: 0; border-left: 0 none; border-right: 0 none; border-radius: 0; white-space: nowrap">Page <span id="page_lbl">0</span> of <span id="page_count_lbl">0</span></label>
+                    <label class="form-control" style="margin-bottom: 0; border-left: 0 none; border-right: 0 none; border-radius: 0; white-space: nowrap; padding-top: 0">Page <input id="page_txt" type="text" class="form-control" value="0" autocomplete="off" disabled/> of <span id="page_count_lbl">0</span></label>
                 </td>
                 <td>
                     <button id="next_btn" type="button" class="btn btn-default" style="margin-bottom: 0; border-radius: 0" autocomplete="off" disabled>&rsaquo;</button>
@@ -159,14 +159,18 @@
 		<table id="results">
 			<thead>
 				<tr>
-					<th width="10%" rowspan="2"><label for="select_all_cb">Select All Targets<input id="select_all_cb" type="checkbox" autocomplete="off" disabled /></label></th>
+					<th width="10%" rowspan="2">
+                        <label><input id="predicted_by_any_database" type="radio" name="predicted_by" value="any" autocomplete="off" checked disabled/>Predicted by any database</label><br/>
+                        <label><input id="predicted_by_all_databases" type="radio" name="predicted_by" value="all" autocomplete="off" disabled/>Predicted by all databases</label><br/>
+                        <label for="select_all_cb">Select All Targets<input id="select_all_cb" type="checkbox" autocomplete="off" disabled /></label>
+                    </th>
 					<th width="10%" rowspan="2">
                         Candidate Targets<br/><br/>
                         Sort by Score<br/>
                         <select id="target_score_select" class="form-control" autocomplete="off">
                             <option value="mirdb" selected>miRDB</option>
                             <option value="targetscan">TargetScan</option>
-                            <option value="miranda">miRanda</option>
+                            <!-- <option value="miranda">miRanda</option> -->
                         </select>
                     </th>
 					<th width="10%" rowspan="2">Predicted By</th>

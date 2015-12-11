@@ -9,6 +9,7 @@ var mirna_open = false;
 var term_open = false;
 var sortby = 'mirdb';
 var selected = [];
+var predicted_by = 'any';
 
 Array.prototype.remove = function(v) { this.splice(this.indexOf(v) == -1 ? this.length : this.indexOf(v), 1); }
 
@@ -196,6 +197,18 @@ $(document).ready(function() {
         search();
     });
 
+    $('#page_txt').on('keydown', function(e) {
+        var keyCode = e.keyCode || e.which;
+
+        if(keyCode == 13) {
+            page = $('#page_txt').val();
+            if(isNaN(page)) {
+                page = 1;
+            }
+            search();
+        }
+    });
+
     $('#target_score_select').on('change', function() {
        search();
     });
@@ -227,12 +240,15 @@ $(document).ready(function() {
     $('#select_all_cb').on('change', function() {
         if($(this).is(':checked')) {
             $('#select_all_cb').prop('disabled', true);
-            $.get('/search.php', { type: 'all-targets', mirna: mirna, term: term })
+
+            predicted_by = $('input[name=predicted_by]:checked').val();
+            $.get('/search.php', { type: 'all-targets', mirna: mirna, term: term, predicted_by: predicted_by })
                 .done(function(data) {
                     selected = data.targets;
+                    $('#results_body').find('input[type=checkbox]').prop('checked', true);
                 })
                 .fail(function() {
-                    alert('Failed to retrieve targets from server');
+                    window.location.href = "/error.php";
                 })
                 .always(function() {
                     $('#select_all_cb').prop('disabled', false);
@@ -240,8 +256,8 @@ $(document).ready(function() {
         }
         else {
             selected = [];
+            $('#results_body').find('input[type=checkbox]').prop('checked', false);
         }
-        $('#results_body').find('input[type=checkbox]').prop('checked', $(this).is(':checked'));
     });
 
     $('#results').find('tbody').on('change', 'input[type=checkbox]', function() {
@@ -260,13 +276,17 @@ $(document).ready(function() {
         $('#select_all_cb').prop('checked', false);
         $('#select_all_cb').prop('disabled', true);
         $('#term_lbl').text('');
-        $('#page_lbl').text('0');
+        $('#page_txt').val('0');
         $('#page_count_lbl').text('0');
         selected = [];
         page = 1;
         page_count = 1;
         target_count = 0;
         downloaded = false;
+    });
+
+    $('input[name=predicted_by]').on('change', function() {
+       search();
     });
 
     $('#download_results').find('input[name=amount]').on('change', function() {
@@ -285,8 +305,7 @@ $(document).ready(function() {
             $('#format').prop('disabled', false);
         }
         else {
-            $('#download_selected_radio').prop('checked', true);
-            $('#download_selected_radio').prop('disabled', false);
+            $('#download_selected_radio').prop('checked', true).prop('disabled', false);
             $('#format').prop('disabled', true);
         }
     });
@@ -297,11 +316,12 @@ $(document).ready(function() {
 
     $('#download_btn').on('click', function() {
         var format = $('#format').find('option:selected').prop('value');
+        predicted_by = $('input[name=predicted_by]:checked').val();
         if($('#download_selected_radio').is(':checked')) {
             format = 'txt';
             downloaded = true;
             window.open('/search.php?type=download&mirna=' + mirna + '&term=' + term + '&page=' + page + '&limit=' + limit +
-                '&format=' + format + '&selected=' + ($('#select_all_cb').is(':checked') ? 'all' : selected.toString()), '_blank');
+                '&format=' + format + '&selected=' + ($('#select_all_cb').is(':checked') ? 'all' : selected.toString()) + '&predicted_by='+ predicted_by, '_blank');
         }
         else if($('#download_all_radio').is(':checked')) {
             window.open('/search.php?type=download&mirna=' + mirna + '&term=' + term + '&page=' + page + '&limit=' + limit + '&format=' + format, '_blank');
@@ -382,32 +402,33 @@ function search() {
     term = $('#term_searchbox_input').val().trim();
     limit = $('#limit_select').val();
     sortby = $('#target_score_select').find(':selected').val();
+    predicted_by = $('input[name=predicted_by]:checked').val();
 
     $('input, button, select').prop('disabled', true);
 
-    $.getJSON('/search.php', { type: 'search', mirna: mirna, term: term, sortby: sortby, page: page, limit: limit })
+    $.getJSON('/search.php', { type: 'search', mirna: mirna, term: term, sortby: sortby, page: page, limit: limit, predicted_by: predicted_by })
         .done(function(data) {
             if(data.success) {
                 page = data.page;
                 page_count = data.page_count;
                 target_count = data.target_count;
 
-                $('#page_lbl').text(page);
+                $('#page_txt').val(page);
                 $('#page_count_lbl').text(page_count);
                 $('#total_count_lbl').text(target_count);
                 $('#term_lbl').html(term.length ? '"' + term + '"' : '');
                 $('#results_body').html(data.html);
                 setTimeout(function() {
-                    $('#results_body').find('input[type=checkbox]').each(function() {
-                        if($('#select_all_cb').is(':checked') || $.inArray($(this).val(), selected) != -1) {
-                            $(this).prop('checked', true);
+                    $('#results_body').find('input[type=checkbox]').each(function(index, element) {
+                        if($.inArray(element.value, selected) != -1) {
+                            $(element).prop('checked', true);
                         }
                     });
                 }, 50);
 
                 if(page_count == 0) {
                     $('#page_count_lbl').text('0');
-                    $('#page_lbl').text('0');
+                    $('#page_txt').val('0');
                 }
 
                 if(page_count > 1) {
@@ -419,6 +440,7 @@ function search() {
                         $('#next_btn').prop('disabled', false);
                         $('#last_btn').prop('disabled', false);
                     }
+                    $('#page_txt').prop('disabled', false);
                 }
                 if(page_count > 0) {
                     $('.download').find('input, button, select').prop('disabled', false);
@@ -426,6 +448,8 @@ function search() {
                     $('#limit_select').prop('disabled', false);
                     $('#select_all_cb').prop('disabled', false);
                     $('#target_score_select').prop('disabled', false);
+                    $('#predicted_by_any_database').prop('disabled', false);
+                    $('#predicted_by_all_databases').prop('disabled', false);
                 }
                 $('#select_all_cb').prop('disabled', false);
             }

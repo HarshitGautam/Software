@@ -25,6 +25,11 @@ try {
     else
         $term = '';
 
+    if(!empty($_GET['predicted_by']))
+        $predicted_by = $_GET['predicted_by'];
+    else
+        $predicted_by = 'all';
+
     // Set the request header options to accept sparql-results+json
     $options = array('http' => array('method' => "GET", 'header' => "Accept: application/sparql-results+json\r\n"));
 
@@ -34,7 +39,7 @@ try {
     // If search is requested
     if ($type === 'search') {
         // If the limit and page parameters were not supplied
-        if (empty($_GET['limit']) || empty($_GET['page'])) {
+        if (empty($_GET['limit']) || !isset($_GET['page'])) {
             // Navigate to the error page
             header('Location: /error.php');
             exit;
@@ -83,9 +88,9 @@ try {
         else if($sortby == 'targetscan') {
             $query .= 'ORDER BY DESC(?targetscan_score) DESC(?mirdb_score)';
         }
-        else {
-            $query .= 'ORDER BY DESC(?mirdb_score) DESC(?targetscan_score)';
-        }
+//        else {
+//            $query .= 'ORDER BY DESC(?mirdb_score) DESC(?targetscan_score)';
+//        }
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -164,23 +169,23 @@ try {
                 '<td style="font-size: 125%; font-weight: bold">' . $target['gene_symbol']['value'] . '</td>' .
                 '<td>';
 
-            if(isset($target['mirdb_score']['value']) && $target['mirdb_score']['value'] >= 0) {
+            if (isset($target['mirdb_score']['value']) && $target['mirdb_score']['value'] >= 0) {
                 $html .= '<a href="http://mirdb.org/cgi-bin/search.cgi?searchType=miRNA&searchBox=' . $mirna . '&full=1" target="_blank">miRDB</a><br/>';
             }
-            if(isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] >= 0) {
+            if (isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] >= 0) {
                 $html .= '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=' . str_replace('hsa-', '', $mirna) . '" target="_blank">TargetScan</a><br/>';
             }
+
             //if(!empty($target['miranda_score']['value'])) {
             //    $html .= '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>';
             //}
 
             $html .= '</td><td>';
 
-            if(empty($target['pubmed_ids']['value'])) {
-                $html .= '<a href="http://www.ncbi.nlm.nih.gov/pubmed?LinkName=gene_pubmed&from_uid=' . $target['gene_id']['value'] . '" target="_blank">All</a><br/>';
-            }
-            else {
-                $pubmed_count = count(explode(',' ,  $target['pubmed_ids']['value']));
+            if (empty($target['pubmed_ids']['value'])) {
+                $html .= '<a href="http://www.ncbi.nlm.nih.gov/pubmed?LinkName=gene_pubmed&from_uid=' . $target['gene_id']['value'] . '" target="_blank">' . $target['gene_symbol']['value'] . '</a><br/>';
+            } else {
+                $pubmed_count = count(explode(',', $target['pubmed_ids']['value']));
                 $html .= '<a href="http://www.ncbi.nlm.nih.gov/pubmed/' . $target['pubmed_ids']['value'] . '" target="_blank">' . $target['gene_symbol']['value'] . ' (' . $pubmed_count . ')</a><br/>';
             }
 
@@ -214,8 +219,8 @@ try {
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
             'SELECT ?gene_symbol ' .
             '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
-            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
-            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, -1)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, -1)) AS ?targetscan_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
@@ -263,8 +268,15 @@ try {
 
         // Loop through each target
         foreach ($json['results']['bindings'] as $target) {
-            // Add the target string to the array
-            $targets[] = $target['gene_symbol']['value'];
+            if($predicted_by == 'any') {
+                // Add the target string to the array
+                $targets[] = $target['gene_symbol']['value'];
+            }
+            else if(isset($target['mirdb_score']['value']) && $target['mirdb_score']['value'] >= 0 &&
+                isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] >= 0) {
+                // Add the target string to the array
+                $targets[] = $target['gene_symbol']['value'];
+            }
         }
 
         // Set the header content type to json
@@ -291,8 +303,8 @@ try {
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
             'SELECT ?gene_symbol ' .
             '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
-            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
-            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, -1)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, -1)) AS ?targetscan_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
@@ -418,8 +430,7 @@ catch(Exception $ex) {
     // Log the error
     error_log($ex);
 
-    // Inform the user that the store is unavailable
-    echo $ex;
+    header('Location: /error.php');
     exit;
 }
 

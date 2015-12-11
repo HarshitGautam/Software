@@ -28,6 +28,12 @@
     width: 80px;
 }
 
+#page_txt {
+    width: 50px;
+    height: auto;
+    margin: -1px 0 0;
+}
+
 #select_all_cb {
     margin: 0 0 0 6px;
 }

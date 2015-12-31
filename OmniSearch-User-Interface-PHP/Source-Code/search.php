@@ -60,6 +60,7 @@ try {
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
             '?target rdf:type obo:NCRO_0000025 . ' .
@@ -74,9 +75,8 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
-            '?pmed_info rdf:type obo:OMIT_0000003 . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
-            '?pmed_info obo:OMIT_0000150 "' . strtolower($term) . '" . ' .
+            '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
             '} ' .
@@ -224,6 +224,7 @@ try {
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
             '?target rdf:type obo:NCRO_0000025 . ' .
@@ -238,9 +239,8 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
-            '?pmed_info rdf:type obo:OMIT_0000003 . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
-            '?pmed_info obo:OMIT_0000150 "' . strtolower($term) . '" . ' .
+            '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
             '} ' .
@@ -308,6 +308,7 @@ try {
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
             '?target rdf:type obo:NCRO_0000025 . ' .
@@ -322,9 +323,8 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
-            '?pmed_info rdf:type obo:OMIT_0000003 . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
-            '?pmed_info obo:OMIT_0000150 "' . strtolower($term) . '" . ' .
+            '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
             '} ' .

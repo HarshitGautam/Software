@@ -1,0 +1,6 @@
+c:\users\harri\documents\visual studio 2015\Projects\GeneData\GeneData\bin\Debug\GeneData.exe.config
+c:\users\harri\documents\visual studio 2015\Projects\GeneData\GeneData\bin\Debug\GeneData.exe
+c:\users\harri\documents\visual studio 2015\Projects\GeneData\GeneData\bin\Debug\GeneData.pdb
+c:\users\harri\documents\visual studio 2015\Projects\GeneData\GeneData\obj\Debug\GeneData.csprojResolveAssemblyReference.cache
+c:\users\harri\documents\visual studio 2015\Projects\GeneData\GeneData\obj\Debug\GeneData.exe
+c:\users\harri\documents\visual studio 2015\Projects\GeneData\GeneData\obj\Debug\GeneData.pdb

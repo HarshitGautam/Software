@@ -156,15 +156,17 @@
                 </td>
 			</tr>
 		</table>
-		<table id="results">
+		<table id="results" width="100%">
 			<thead>
 				<tr>
 					<th width="10%" rowspan="2">
+                        <!--
                         <label><input id="predicted_by_any_database" type="radio" name="predicted_by" value="any" autocomplete="off" checked disabled/>Predicted by any database</label><br/>
                         <label><input id="predicted_by_all_databases" type="radio" name="predicted_by" value="all" autocomplete="off" disabled/>Predicted by all databases</label><br/>
-                        <label for="select_all_cb">Select All Targets<input id="select_all_cb" type="checkbox" autocomplete="off" disabled /></label>
+                        -->
+                        <label for="select_all_cb">Select All</br>Targets<br/><input id="select_all_cb" type="checkbox" autocomplete="off" disabled /></label>
                     </th>
-					<th width="10%" rowspan="2">
+					<th width="20%" rowspan="2">
                         Candidate Targets<br/><br/>
                         Sort by Score<br/>
                         <select id="target_score_select" class="form-control" autocomplete="off">
@@ -173,15 +175,21 @@
                             <!-- <option value="miranda">miRanda</option> -->
                         </select>
                     </th>
-					<th width="10%" rowspan="2">Predicted By</th>
-					<th width="30%" colspan="2">Evidence</th>
+					<th width="20%" rowspan="2">
+                        Predicted By<br/><br/><br/>
+                        <select id="predicted_by_select" name="predicted_by" class="form-control" autocomplete="off">
+                            <option value="any" selected>Any Database</option>
+                            <option value="all">All Databases</option>
+                        </select>
+                    </th>
+					<th width="50%" colspan="2">Evidence</th>
 				</tr>
 				<tr>
-					<th width="20%" style="white-space: normal">
+					<th width="25%" style="white-space: normal">
                         <span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-placement="left" title="Publications below are filtered according to the selected MeSH term and the filter type."></span>
                         <span id="term_lbl"></span> Publications
                     </th>
-					<th width="20%">
+					<th width="25%">
                         <span class="glyphicon glyphicon-question-sign pull-right" data-toggle="tooltip" data-placement="left" title="GO Annotations for target/microRNA."></span>
                         GO Annotations
                     </th>

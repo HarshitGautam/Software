@@ -6,18 +6,26 @@ error_reporting(0);
 // Set the date timezone
 date_default_timezone_set('America/New_York');
 
-// If the type, mirna or term query parameters were not supplied
+// Set the request header options to accept sparql-results+json
+$options = array('http' => array('method' => "GET", 'header' => "Accept: application/sparql-results+json\r\n"));
+
+// Create the stream context
+$stream_context = stream_context_create($options);
+
+// If the type or mirna query parameters were not supplied
 if(empty($_GET['type']) || empty($_GET['mirna'])) {
     // Navigate to the error page
     header('Location: /error.php');
     exit;
 }
 
+// Holds query parameters
+$type = $_GET['type'];
+$mirna = $_GET['mirna'];
+
 // Try
 try {
-    // Store the required query string parameters
-    $type = $_GET['type'];
-    $mirna = $_GET['mirna'];
+    // Holds the query parameters
     $sortby = $_GET['sortby'];
 
     if(!empty($_GET['term']))
@@ -29,12 +37,6 @@ try {
         $predicted_by = $_GET['predicted_by'];
     else
         $predicted_by = 'all';
-
-    // Set the request header options to accept sparql-results+json
-    $options = array('http' => array('method' => "GET", 'header' => "Accept: application/sparql-results+json\r\n"));
-
-    // Create the stream context
-    $stream_context = stream_context_create($options);
 
     // If search is requested
     if ($type === 'search') {
@@ -53,14 +55,17 @@ try {
         $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
+            'SELECT * ' .
+            'WHERE { ' .
+            '{ ' .
             'SELECT ?gene_symbol ' .
             '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
-            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, -1)) AS ?mirdb_score) ' .
-            '(MAX(IF(BOUND(?ts_score), ?ts_score, -1)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mrnd_score), ?mrnd_score, 0)) AS ?miranda_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
-            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
             '?target rdf:type obo:NCRO_0000025 . ' .
@@ -75,22 +80,21 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
+            '?prediction rdf:type obo:OMIT_0000021 . ' .
+            '?prediction obo:OMIT_0000108 ?mrnd_score ' .
+            '}. ' .
+            'OPTIONAL { ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
             '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
             '} ' .
             '} ' .
-            'GROUP BY ?gene_symbol ';
-
-        if($sortby == 'mirdb') {
-            $query .= 'ORDER BY DESC(?mirdb_score) DESC(?targetscan_score)';
-        }
-        else if($sortby == 'targetscan') {
-            $query .= 'ORDER BY DESC(?targetscan_score) DESC(?mirdb_score)';
-        }
-//        else {
-//            $query .= 'ORDER BY DESC(?mirdb_score) DESC(?targetscan_score)';
-//        }
+            'GROUP BY ?gene_symbol ' .
+            'ORDER BY DESC(?' . $sortby . '_score) ' .
+            '} ' .
+            ($predicted_by === 'all' ? 'FILTER (?mirdb_score != 0 && ?targetscan_score != 0 && ?miranda_score != 0) ' : '') .
+            '} ';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -137,9 +141,46 @@ try {
             $offset = ($page - 1) * $limit;
         }
 
-        // Concatenate the LIMIT and OFFSET to the query
-        $query .= ($limit === 'All' ? '' : 'LIMIT ' . $limit . ' OFFSET ' . $offset);
-
+        // Build the COUNT query string
+        $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
+            'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+            'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
+            'SELECT * ' .
+            'WHERE { ' .
+            '{ ' .
+            'SELECT ?gene_symbol ' .
+            '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, -1)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, -1)) AS ?targetscan_score) ' .
+            '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
+            'WHERE { ' .
+            '?mirna rdfs:label "' . $mirna . '" . ' .
+            '?prediction obo:RO_0000057 ?mirna . ' .
+            '?prediction obo:RO_0000057 ?target . ' .
+            '?target rdf:type obo:NCRO_0000025 . ' .
+            '?target rdfs:label ?gene_symbol . ' .
+            '?target obo:OMIT_0000109 ?g_id . ' .
+            'OPTIONAL { ' .
+            '?prediction rdf:type obo:OMIT_0000020 . ' .
+            '?prediction obo:OMIT_0000108 ?mdb_score ' .
+            '} . ' .
+            'OPTIONAL { ' .
+            '?prediction rdf:type obo:OMIT_0000019 . ' .
+            '?prediction obo:OMIT_0000108 ?ts_score ' .
+            '}. ' .
+            'OPTIONAL { ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
+            '?pmed_info obo:RO_0000057 ?target . ' .
+            '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
+            '?pmed_info obo:OMIT_0000151 ?pmid ' .
+            '} ' .
+            '} ' .
+            'GROUP BY ?gene_symbol ' .
+            'ORDER BY DESC(?' . $sortby . '_score) ' .
+            ($limit === 'All' ? '' : 'LIMIT ' . $limit . ' OFFSET ' . $offset . ' ') .
+            '} ' .
+            ($predicted_by === 'all' ? 'FILTER (?mirdb_score != -1 && ?targetscan_score != -1 && ?miranda_score != 0) ' : '') .
+            '} ';
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -175,10 +216,9 @@ try {
             if (isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] >= 0) {
                 $html .= '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=' . str_replace('hsa-', '', $mirna) . '" target="_blank">TargetScan</a><br/>';
             }
-
-            //if(!empty($target['miranda_score']['value'])) {
-            //    $html .= '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>';
-            //}
+            if(isset($target['miranda_score']['value']) && $target['miranda_score']['value'] <= 0) {
+                $html .= '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>';
+            }
 
             $html .= '</td><td>';
 
@@ -224,7 +264,6 @@ try {
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
-            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
             '?target rdf:type obo:NCRO_0000025 . ' .
@@ -239,6 +278,7 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
             '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .
@@ -308,7 +348,6 @@ try {
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
-            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?prediction obo:RO_0000057 ?mirna . ' .
             '?prediction obo:RO_0000057 ?target . ' .
             '?target rdf:type obo:NCRO_0000025 . ' .
@@ -323,6 +362,7 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
+            '?mesh_term rdfs:label "' . $term . '" . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
             '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
             '?pmed_info obo:OMIT_0000151 ?pmid ' .

@@ -36,7 +36,12 @@ try {
     if(!empty($_GET['predicted_by']))
         $predicted_by = $_GET['predicted_by'];
     else
-        $predicted_by = 'all';
+        $predicted_by = 'any';
+
+    if(!empty($_GET['publication_filter']))
+        $publication_filter = $_GET['publication_filter'];
+    else
+        $publication_filter = 'all';
 
     // If search is requested
     if ($type === 'search') {
@@ -62,7 +67,7 @@ try {
             '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
             '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
             '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
-            '(MAX(IF(BOUND(?mrnd_score), ?mrnd_score, 0)) AS ?miranda_score) ' .
+            '(MAX(IF(BOUND(?mrnd_score), ABS(?mrnd_score), 0)) AS ?miranda_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
@@ -94,6 +99,9 @@ try {
             'ORDER BY DESC(?' . $sortby . '_score) ' .
             '} ' .
             ($predicted_by === 'all' ? 'FILTER (?mirdb_score != 0 && ?targetscan_score != 0 && ?miranda_score != 0) ' : '') .
+            ($publication_filter === 'all' ? '' :
+                ($publication_filter === 'has_pubmed' ? 'FILTER (BOUND(?pubmed_ids)) ' : 'FILTER (!BOUND(?pubmed_ids)) ')
+            ).
             '} ';
 
         // Build the query url
@@ -141,7 +149,6 @@ try {
             $offset = ($page - 1) * $limit;
         }
 
-        // Build the COUNT query string
         $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
             'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
             'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
@@ -150,8 +157,9 @@ try {
             '{ ' .
             'SELECT ?gene_symbol ' .
             '(GROUP_CONCAT(DISTINCT ?g_id; SEPARATOR=",") AS ?gene_id) ' .
-            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, -1)) AS ?mirdb_score) ' .
-            '(MAX(IF(BOUND(?ts_score), ?ts_score, -1)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mdb_score), ?mdb_score, 0)) AS ?mirdb_score) ' .
+            '(MAX(IF(BOUND(?ts_score), ?ts_score, 0)) AS ?targetscan_score) ' .
+            '(MAX(IF(BOUND(?mrnd_score), ABS(?mrnd_score), 0)) AS ?miranda_score) ' .
             '(GROUP_CONCAT(DISTINCT ?pmid; SEPARATOR=",") AS ?pubmed_ids) ' .
             'WHERE { ' .
             '?mirna rdfs:label "' . $mirna . '" . ' .
@@ -169,6 +177,10 @@ try {
             '?prediction obo:OMIT_0000108 ?ts_score ' .
             '}. ' .
             'OPTIONAL { ' .
+            '?prediction rdf:type obo:OMIT_0000021 . ' .
+            '?prediction obo:OMIT_0000108 ?mrnd_score ' .
+            '}. ' .
+            'OPTIONAL { ' .
             '?mesh_term rdfs:label "' . $term . '" . ' .
             '?pmed_info obo:RO_0000057 ?target . ' .
             '?pmed_info obo:BFO_0000051 ?mesh_term . ' .
@@ -177,10 +189,13 @@ try {
             '} ' .
             'GROUP BY ?gene_symbol ' .
             'ORDER BY DESC(?' . $sortby . '_score) ' .
-            ($limit === 'All' ? '' : 'LIMIT ' . $limit . ' OFFSET ' . $offset . ' ') .
             '} ' .
-            ($predicted_by === 'all' ? 'FILTER (?mirdb_score != -1 && ?targetscan_score != -1 && ?miranda_score != 0) ' : '') .
-            '} ';
+            ($predicted_by === 'all' ? 'FILTER (?mirdb_score != 0 && ?targetscan_score != 0 && ?miranda_score != 0) ' : '') .
+            ($publication_filter === 'all' ? '' :
+                ($publication_filter === 'has_pubmed' ? 'FILTER (BOUND(?pubmed_ids)) ' : 'FILTER (!BOUND(?pubmed_ids)) ')
+            ).
+            '} ' .
+            ($limit === 'All' ? '' : 'LIMIT ' . $limit . ' OFFSET ' . $offset . ' ');
 
         // Build the query url
         $url = 'http://localhost:3030/OmniStore/query?query=' . urlencode($query);
@@ -210,13 +225,13 @@ try {
                 '<td style="font-size: 125%; font-weight: bold">' . $target['gene_symbol']['value'] . '</td>' .
                 '<td>';
 
-            if (isset($target['mirdb_score']['value']) && $target['mirdb_score']['value'] >= 0) {
+            if (isset($target['mirdb_score']['value']) && $target['mirdb_score']['value'] != 0) {
                 $html .= '<a href="http://mirdb.org/cgi-bin/search.cgi?searchType=miRNA&searchBox=' . $mirna . '&full=1" target="_blank">miRDB</a><br/>';
             }
-            if (isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] >= 0) {
+            if (isset($target['targetscan_score']['value']) && $target['targetscan_score']['value'] != 0) {
                 $html .= '<a href="http://www.targetscan.org/cgi-bin/targetscan/vert_70/targetscan.cgi?species=Human&gid=&mir_sc=&mir_c=&mir_nc=&mirg=' . str_replace('hsa-', '', $mirna) . '" target="_blank">TargetScan</a><br/>';
             }
-            if(isset($target['miranda_score']['value']) && $target['miranda_score']['value'] <= 0) {
+            if (isset($target['miranda_score']['value']) && $target['miranda_score']['value'] != 0) {
                 $html .= '<a href="http://www.microrna.org/microrna/getTargets.do?matureName=' . $mirna . '&organism=9606" target="_blank">microRNA.org</a><br/>';
             }
 

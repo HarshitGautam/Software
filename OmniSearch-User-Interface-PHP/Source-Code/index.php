@@ -169,20 +169,28 @@
 					<th width="20%" rowspan="2">
                         Candidate Targets<br/><br/>
                         Sort by Score<br/>
-                        <select id="target_score_select" class="form-control" autocomplete="off">
+                        <select id="target_score_select" class="form-control" autocomplete="off" disabled>
                             <option value="mirdb" selected>miRDB</option>
                             <option value="targetscan">TargetScan</option>
-                            <!-- <option value="miranda">miRanda</option> -->
+                            <option value="miranda">miRanda</option>
                         </select>
                     </th>
 					<th width="20%" rowspan="2">
-                        Predicted By<br/><br/><br/>
-                        <select id="predicted_by_select" name="predicted_by" class="form-control" autocomplete="off">
+                        Predicted By<br/><br/>
+                        Filter<br/>
+                        <select id="predicted_by_select" name="predicted_by" class="form-control" autocomplete="off" disabled>
                             <option value="any" selected>Any Database</option>
                             <option value="all">All Databases</option>
                         </select>
                     </th>
-					<th width="50%" colspan="2">Evidence</th>
+					<th width="50%" colspan="2">
+                        Evidence
+                        <select id="publication_filter_select" name="publication_filter" class="form-control" style="width: auto" autocomplete="off" disabled>
+                            <option value="all" selected>Show All</option>
+                            <option value="has_pubmed">Has Publications</option>
+                            <option value="no_pubmed">No Publications</option>
+                        </select>
+                    </th>
 				</tr>
 				<tr>
 					<th width="25%" style="white-space: normal">

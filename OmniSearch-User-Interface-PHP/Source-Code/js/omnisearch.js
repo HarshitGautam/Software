@@ -10,6 +10,7 @@ var term_open = false;
 var sortby = 'mirdb';
 var selected = [];
 var predicted_by = 'any';
+var publication_filter = 'all';
 
 Array.prototype.remove = function(v) { this.splice(this.indexOf(v) == -1 ? this.length : this.indexOf(v), 1); }
 
@@ -285,8 +286,12 @@ $(document).ready(function() {
         downloaded = false;
     });
 
-    $('input[name=predicted_by]').on('change', function() {
+    $('#predicted_by_select').on('change', function() {
        search();
+    });
+
+    $('#publication_filter_select').on('change', function() {
+        search();
     });
 
     $('#download_results').find('input[name=amount]').on('change', function() {
@@ -402,11 +407,13 @@ function search() {
     term = $('#term_searchbox_input').val().trim();
     limit = $('#limit_select').val();
     sortby = $('#target_score_select').find(':selected').val();
-    predicted_by = $('input[name=predicted_by]:checked').val();
+    predicted_by = $('#predicted_by_select').find(':selected').val();
+    publication_filter = $('#publication_filter_select').find(':selected').val();
 
     $('input, button, select').prop('disabled', true);
 
-    $.getJSON('/search.php', { type: 'search', mirna: mirna, term: term, sortby: sortby, page: page, limit: limit, predicted_by: predicted_by })
+    $.getJSON('/search.php', { type: 'search', mirna: mirna, term: term, sortby: sortby, page: page,
+        limit: limit, predicted_by: predicted_by, publication_filter: publication_filter })
         .done(function(data) {
             if(data.success) {
                 page = data.page;
@@ -448,13 +455,13 @@ function search() {
                     $('#limit_select').prop('disabled', false);
                     $('#select_all_cb').prop('disabled', false);
                     $('#target_score_select').prop('disabled', false);
-                    $('#predicted_by_any_database').prop('disabled', false);
-                    $('#predicted_by_all_databases').prop('disabled', false);
                 }
                 $('#select_all_cb').prop('disabled', false);
             }
             else {
                 $('#results_body').html('<tr><td colspan="5"><h4>No results found</h4></td></tr>');
+                $('#page_txt').val('0');
+                $('#page_count_lbl').text('0)');
             }
         })
         .fail(function(request, status, error) {
@@ -462,5 +469,7 @@ function search() {
         })
         .always(function() {
             $('#search_controls').find('input, button, select').prop('disabled', false);
+            $('#predicted_by_select').prop('disabled', false);
+            $('#publication_filter_select').prop('disabled', false);
         });
 }

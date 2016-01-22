@@ -59,6 +59,7 @@ label[for=select_all_cb] {
     display: table;
     margin: 0 auto;
 }
+
 .controls th,
 .controls td {
     vertical-align: middle;
@@ -68,6 +69,7 @@ label[for=select_all_cb] {
 .download {
     position: relative;
 }
+
 .download > div {
     display: none;
     position: absolute;
@@ -89,6 +91,7 @@ label[for=select_all_cb] {
     position: relative;
     width: 100%;
 }
+
 .searchbox > input[type=text] {
     display: inline-block;
     border: 2px solid #444;
@@ -98,9 +101,11 @@ label[for=select_all_cb] {
     width: 100%;
     height: 100%;
 }
+
 .searchbox > input[type=text]:focus {
     border-color: #3399FF;
 }
+
 .searchbox > div {
     display: none;
     position: absolute;
@@ -113,9 +118,11 @@ label[for=select_all_cb] {
     max-height: 300px;
     z-index: 999;
 }
+
 .searchbox.show > div {
     display: block;
 }
+
 .searchbox > div > p {
     background: #fff;
     color: #444;
@@ -123,10 +130,12 @@ label[for=select_all_cb] {
     padding: 4px;
     border-radius: 2px;
 }
+
 .searchbox > div > p:focus {
     background: #3399FF;
     color: #fff;
 }
+
 .searchbox > div > h5 {
     color: #444;
     margin: 0;

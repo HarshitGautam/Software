@@ -180,6 +180,16 @@ try {
         $html .= '</td><td>';
 
         if (empty($target['pubmed_ids']['value'])) {
+<<<<<<< HEAD
+            $html .= '<span style="margin: 0">' . $target['gene_symbol']['value'] . ' (0)</span>';
+        } else {
+            $pubmed_count = count(explode(',', $target['pubmed_ids']['value']));
+            $html .= '<a href="http://www.ncbi.nlm.nih.gov/pubmed/' . $target['pubmed_ids']['value'] . '" target="_blank">' . $target['gene_symbol']['value'] . ' (' . $pubmed_count . ')</a>';
+        }
+
+        $html .= '</td><td>' .
+            '<a href="http://amigo.geneontology.org/amigo/search/annotation?fq=taxon_label:&quot;Homo sapiens&quot;&q=&quot;' .$target['gene_symbol']['value'] . '&quot;' . '" target="_blank">' . $target['gene_symbol']['value'] . '</a>' .
+=======
             $html .= '<p>' . $target['gene_symbol']['value'] . ' (0)</p><br/>';
         } else {
             $pubmed_count = count(explode(',', $target['pubmed_ids']['value']));
@@ -189,6 +199,7 @@ try {
         $html .= '</td><td>' .
             '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $target['gene_symbol']['value'] . '" target="_blank">' . $target['gene_symbol']['value'] . '</a><br/>' .
             '<a href="http://amigo.geneontology.org/amigo/medial_search?q=' . $mirna . '" target="_blank">' . $mirna . '</a><br/>' .
+>>>>>>> origin/master
             '</td></tr>';
     }
 

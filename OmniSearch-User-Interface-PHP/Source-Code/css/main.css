@@ -1,0 +1,162 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.body {
+    background: #fff;
+    color: Black;
+    font: .8em normal small "Trebuchet MS", Tahoma, verdana, arial, helvetica, sans-serif;
+    line-height: 1.6em;
+}
+
+.wrapper {
+    margin: 10px auto;
+    border: 3px solid #e4e4e4;
+    width: 1200px;
+}
+
+.menu ul {
+    list-style: none;
+}
+
+.menu li {
+    display: inline;
+}
+
+.menu li a {
+    float: left;
+    display: inline;
+    list-style-type: none;
+    text-align: center;
+    color: #555555;
+    font-size: 1.1em;
+    text-decoration: none;
+    height: 30px;
+    line-height: 32px;
+}
+
+.menu li a:hover {
+    color: Blue;
+    font-weight: bold;
+}
+
+div.hr {
+    height: 1px;
+    background: #3ba4c4;
+}
+
+div.hr hr {
+    display: none;
+}
+
+.imagepadding {
+    margin: 10px 0px 10px 10px;
+}
+
+.content {
+    font-family: Arial;
+    color: #000;
+    margin: 30px 30px 0px 30px;
+    padding: 10px 0 0 0;
+    word-spacing: normal;
+}
+
+.left {
+    font-family: Arial;
+    color: #000;
+    margin: 30px 0px 0px 30px;
+    padding-bottom: 5px;
+}
+
+.leftcontent {
+    font-family: Arial;
+    color: #000;
+    padding-bottom: 5px;
+    float: left;
+    width: 825px;
+    margin-left: 25px;
+    margin-top: 8px;
+    padding: 1em;
+    font-weight: lighter;
+    height: auto;
+}
+
+.leftcontent p, .left p, .right p {
+    padding: 10px 0 0 0;
+}
+
+.left h1, .right h1, .leftcontent h1 {
+    font-family: trajan pro, agency fb, Arial, Helvetica, sans-serif;
+    font-weight: lighter;
+    color: #555;
+    padding: 15px 0 0 0;
+}
+
+.right {
+    color: #000;
+    margin-left: 895px;
+    margin-top: 8px;
+    padding: 1em;
+}
+
+.right h2 {
+    padding: 15px 10px 0 30px;
+    font: 13px normal trajan pro, agency fb, arial, helvetica, sans-serif;
+    color: #3ba4c4;
+    text-decoration: underline;
+    width: 74px;
+}
+
+.bulletlist {
+    font-family: Arial;
+    color: #000;
+    margin: 0px 0px 0px 15px;
+    padding-bottom: 5px;
+}
+
+.footer {
+    background: #FFF;
+    color: #666;
+    font-size: 1.1em;
+    margin: 0 auto;
+    text-align: center;
+    padding: 6px;
+}
+
+.footer a {
+    color: #36C;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #06F;
+    text-decoration: underline;
+}
+
+.date {
+    color: #3ba4c4;
+    padding-bottom: 5px;
+}
+
+.textright {
+    text-align: right;
+    font-size: small;
+}
+
+.title {
+    font-size: 33px;
+    width: 100%;
+}
+
+.search {
+    font-size: 36px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.paddingr {
+    padding-right: 18px;
+}

@@ -6,53 +6,63 @@ namespace GeneData
 {
     class Program
     {
+        // Holds a list of miRNAs, Genes and MeSH Terms
+        static List<MiRNA> mirnas = new List<MiRNA>();
+        static List<Gene> genes = new List<Gene>();
+        static List<MeshTerm> meshTerms = new List<MeshTerm>();
+
+        // Holds starting OMIT IRI
+        static int omit_iri = 200;
+
+        static StreamReader sr1, sr2, sr3, sr4, sr5, sr6;
+        static StreamWriter sw1, sw2, sw3, sw4, sw5, sw6;
+
         static void Main(string[] args)
         {
-            // Holds a list of miRNAs, Genes and MeSH Terms
-            List<MiRNA> mirnas = new List<MiRNA>();
-            List<Gene> genes = new List<Gene>();
-            List<MeshTerm> meshTerms = new List<MeshTerm>();
-
-            // Holds starting OMIT IRI
-            int omit_iri = 200;
-
             // text_data path
-            string input_path = "../../../../../../omit/src/text_data/";
+            string input_path = "text_data/";
+
+            // mirna_data.txt should contain the following columns separated by a tab
+            // Label    IRI
+            // 
+            // Example mirna_data.txt:
+            // hsa-let-7a-2-3p	NCRO_MIMAT0010195
+            sr1 = new StreamReader(new FileStream(input_path + "mirna_data.txt", FileMode.Open));
 
             // mirdb_data.txt should contain the following columns separated by a tab
             // microRNA     GeneId      GeneSymbol      Score
             // 
             // Example mirdb_data.txt:
             // hsa-miR-125b-5p	3662	IRF4	100
-            StreamReader sr1 = new StreamReader(new FileStream(input_path + "mirdb_data.txt", FileMode.Open));
+            sr2 = new StreamReader(new FileStream(input_path + "mirdb_data.txt", FileMode.Open));
 
             // targetscan_data.txt should contain the following columns separated by a tab
             // microRNA     GeneId      GeneSymbol      Score
             // 
             // Example targetscan_data.txt:
             // hsa-miR-125b-5p	3662	IRF4	100
-            StreamReader sr2 = new StreamReader(new FileStream(input_path + "targetscan_data.txt", FileMode.Open));
+            sr3 = new StreamReader(new FileStream(input_path + "targetscan_data.txt", FileMode.Open));
 
             // miranda_data.txt should contain the following columns separated by a tab
             // microRNA     GeneId      GeneSymbol      Score
             // 
             // Example miranda_data.txt:
             // hsa-miR-125b-5p	3662	IRF4	100
-            StreamReader sr3 = new StreamReader(new FileStream(input_path + "miranda_data.txt", FileMode.Open));
+            sr4 = new StreamReader(new FileStream(input_path + "miranda_data.txt", FileMode.Open));
 
             // pubmed_data.txt should contain the following columns separated by a tab
             // GeneId   PubMedId    MeSH_Term
             // 
             // Example pubmed_data.txt:
             // 3662 19897031	Mutagenesis
-            StreamReader sr4 = new StreamReader(new FileStream(input_path + "pubmed_data.txt", FileMode.Open));
+            sr5 = new StreamReader(new FileStream(input_path + "pubmed_data.txt", FileMode.Open));
 
             // mesh_term_data.txt should contain the following columns separated by a tab
             // MeSH_Term    OMIT_IRI
             // 
             // Example mesh_term_data.txt:
             // Drug resistance  OMIT_0000072
-            StreamReader sr5 = new StreamReader(new FileStream(input_path + "mesh_term_data.txt", FileMode.Open));
+            sr6 = new StreamReader(new FileStream(input_path + "mesh_term_data.txt", FileMode.Open));
 
             // If the output directory does not exist
             if(!Directory.Exists("output"))
@@ -65,28 +75,19 @@ namespace GeneData
             string output_path = "output/";
 
             // Create owl files for writing
-            StreamWriter sw1 = new StreamWriter(new FileStream(output_path + "mirna.owl", FileMode.Create));
-            StreamWriter sw2 = new StreamWriter(new FileStream(output_path + "genes.owl", FileMode.Create));
-            StreamWriter sw3 = new StreamWriter(new FileStream(output_path + "mirdb.owl", FileMode.Create));
-            StreamWriter sw4 = new StreamWriter(new FileStream(output_path + "targetscan.owl", FileMode.Create));
-            StreamWriter sw5 = new StreamWriter(new FileStream(output_path + "miranda.owl", FileMode.Create));
-            StreamWriter sw6 = new StreamWriter(new FileStream(output_path + "pubmed.owl", FileMode.Create));
+            sw1 = new StreamWriter(new FileStream(output_path + "mirna.ttl", FileMode.Create));
+            sw2 = new StreamWriter(new FileStream(output_path + "genes.ttl", FileMode.Create));
+            sw3 = new StreamWriter(new FileStream(output_path + "mirdb.ttl", FileMode.Create));
+            sw4 = new StreamWriter(new FileStream(output_path + "targetscan.ttl", FileMode.Create));
+            sw5 = new StreamWriter(new FileStream(output_path + "miranda.ttl", FileMode.Create));
+            sw6 = new StreamWriter(new FileStream(output_path + "pubmed.ttl", FileMode.Create));
 
             // Construct RDF Header
-            string header = "<?xml version=\"1.0\"?>\n" +
-                "\t<!DOCTYPE rdf:RDF[\n" +
-                "\t\t<!ENTITY owl \"http://www.w3.org/2002/07/owl#\">\n" +
-                "\t\t<!ENTITY obo \"http://purl.obolibrary.org/obo/\">\n" +
-                "\t\t<!ENTITY xsd \"http://www.w3.org/2001/XMLSchema#\">\n" +
-                "\t\t<!ENTITY rdfs \"http://www.w3.org/2000/01/rdf-schema#\">\n" +
-                "\t\t<!ENTITY rdf \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n" +
-                "\t]>\n" +
-                "\t<rdf:RDF\n" +
-                "\t\txmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
-                "\t\txmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" +
-                "\t\txmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n" +
-                "\t\txmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" +
-                "\t\txmlns:obo=\"http://purl.obolibrary.org/obo/\">\n";
+            string header =
+                "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\r\n" +
+                "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\r\n" +
+                "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\r\n" +
+                "@prefix obo: <http://purl.obolibrary.org/obo/> .\r\n\r\n";
 
             // Write header to output files
             sw1.WriteLine(header);
@@ -97,13 +98,30 @@ namespace GeneData
             sw6.WriteLine(header);
 
             // Show status
+            Console.WriteLine("Loading miRNAs...");
+
+            // While miRNA data is available
+            while (!sr1.EndOfStream)
+            {
+                // Read line and split into Label and IRI
+                String[] tokens = sr1.ReadLine().Split("\t".ToCharArray());
+
+                // Get the Label and IRI
+                String label = tokens[0];
+                String iri = tokens[1];
+
+                // Add miRNA to list
+                mirnas.Add(new MiRNA(iri, label));
+            }
+
+            // Show status
             Console.WriteLine("Loading MeSH Terms...");
 
             // While MeSH Term data is available
-            while (!sr5.EndOfStream)
+            while (!sr6.EndOfStream)
             {
                 // Read line and split into IRI and Label
-                String[] tokens = sr5.ReadLine().Split("\t".ToCharArray());
+                String[] tokens = sr6.ReadLine().Split("\t".ToCharArray());
 
                 // Get the IRI and Label
                 String iri = tokens[1];
@@ -117,75 +135,25 @@ namespace GeneData
             Console.WriteLine("Generating miRDB Data...");
 
             // While miRDB.org data is available
-            while (!sr1.EndOfStream)
+            while (!sr2.EndOfStream)
             {
                 // Read line and split by tab character
-                String[] ln = sr1.ReadLine().Split("\t".ToCharArray());
+                String[] ln = sr2.ReadLine().Split("\t".ToCharArray());
 
-                // If the miRNA has not been generated
-                if (mirnas.Find(m => m.Label == ln[0]) == null)
-                {
-                    // Construct the miRNA owl entry
-                    String mirnaTxt = "\t<owl:Class rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdfs:subClassOf rdf:resource=\"&obo;NCRO_0000810\"/>\n" +
-                        "\t\t<rdfs:label rdf:datatype=\"&xsd;string\">" + ln[0] + "</rdfs:label>\n" +
-                        "\t</owl:Class>\n";
+                // Get the mirna
+                MiRNA mirna = GetMiRNA(ln[0]);
 
-                    // Add the new miRNA to the miRNA list
-                    mirnas.Add(new MiRNA("OMIT_" + omit_iri.ToString("D7"), ln[0]));
+                // Get the gene
+                Gene gene = GetGene(ln[2], ln[1]);
 
-                    // Increment the OMIT IRI
-                    ++omit_iri;
+                String iri = "obo:OMIT_" + omit_iri.ToString("D7");
 
-                    // Write the miRNA to the mirna.owl file
-                    sw1.WriteLine(mirnaTxt);
-                }
-
-                // If the Gene has not been generated
-                if (genes.Find(g => g.Symbol == ln[2]) == null)
-                {
-                    // Construct the Gene owl entry
-                    String geneTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdf:type rdf:resource=\"&obo;NCRO_0000025\"/>\n" +
-                        "\t\t<rdfs:label rdf:datatype=\"&xsd;string\">" + ln[2] + "</rdfs:label>\n" +
-                        "\t\t<obo:OMIT_0000109 rdf:datatype=\"&xsd;string\">" + ln[1] + "</obo:OMIT_0000109>\n" +
-                        "\t</owl:NamedIndividual>\n";
-
-                    // Add the Gene to the Gene list
-                    genes.Add(new Gene("OMIT_" + omit_iri.ToString("D7"), ln[2], ln[1]));
-
-                    // Increment the OMIT IRI
-                    ++omit_iri;
-
-                    // Write the Gene to the genes.owl file
-                    sw2.WriteLine(geneTxt);
-                }
-
-                // Find the Gene object
-                Gene gene = genes.Find(g => g.Symbol == ln[2]);
-                // If not found
-                if (gene == null)
-                {
-                    // Throw an exception
-                    throw new Exception("GENE MISSING");
-                }
-
-                // Find the miRNA object
-                MiRNA mirna = mirnas.Find(m => m.Label == ln[0]);
-                // If not found
-                if (mirna == null)
-                {
-                    // Throw an exception
-                    throw new Exception("MIRNA MISSING");
-                }
-
-                // Construct the miRDB.org Prediction owl entry
-                String predTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                    "\t\t<rdf:type rdf:resource=\"&obo;OMIT_0000020\"/>\n" +
-                    "\t\t<obo:OMIT_0000108 rdf:datatype=\"&xsd;decimal\">" + ln[3] + "</obo:OMIT_0000108>\n" +
-                    "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + mirna.IRI + "\"/>\n" +
-                    "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + gene.IRI + "\"/>\n" +
-                    "\t</owl:NamedIndividual>\n";
+                // Construct the miRDB.org triples
+                String predTxt =
+                    iri + " rdf:type obo:OMIT_0000020 .\r\n" +
+                    iri + " obo:OMIT_0000159 obo:" + mirna.IRI + " .\r\n" +
+                    iri + " obo:OMIT_0000160 obo:" + gene.IRI + " .\r\n" +
+                    iri + " obo:OMIT_0000108 \"" + ln[3] + "\"^^xsd:integer .\r\n";
 
                 // Increment the OMIT IRI
                 ++omit_iri;
@@ -198,75 +166,25 @@ namespace GeneData
             Console.WriteLine("Generating TargetScan Data...");
 
             // While targetscan.org data is available
-            while (!sr2.EndOfStream)
+            while (!sr3.EndOfStream)
             {
                 // Read line and split by tab character
-                String[] ln = sr2.ReadLine().Split("\t".ToCharArray());
+                String[] ln = sr3.ReadLine().Split("\t".ToCharArray());
 
-                // If the miRNA has not been generated
-                if (mirnas.Find(m => m.Label == ln[0]) == null)
-                {
-                    // Construct the miRNA owl entry
-                    String mirnaTxt = "\t<owl:Class rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdfs:subClassOf rdf:resource=\"&obo;NCRO_0000810\"/>\n" +
-                        "\t\t<rdfs:label rdf:datatype=\"&xsd;string\">" + ln[0] + "</rdfs:label>\n" +
-                        "\t</owl:Class>\n";
+                // Get the mirna
+                MiRNA mirna = GetMiRNA(ln[0]);
 
-                    // Add the new miRNA to the miRNA list
-                    mirnas.Add(new MiRNA("OMIT_" + omit_iri.ToString("D7"), ln[0]));
+                // Get the gene
+                Gene gene = GetGene(ln[2], ln[1]);
 
-                    // Increment the OMIT IRI
-                    ++omit_iri;
+                String iri = "obo:OMIT_" + omit_iri.ToString("D7");
 
-                    // Write the miRNA to the mirna.owl file
-                    sw1.WriteLine(mirnaTxt);
-                }
-
-                // If the Gene has not been generated
-                if (genes.Find(g => g.Symbol == ln[2]) == null)
-                {
-                    // Construct the Gene owl entry
-                    String geneTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdf:type rdf:resource=\"&obo;NCRO_0000025\"/>\n" +
-                        "\t\t<rdfs:label rdf:datatype=\"&xsd;string\">" + ln[2] + "</rdfs:label>\n" +
-                        "\t\t<obo:OMIT_0000109 rdf:datatype=\"&xsd;string\">" + ln[1] + "</obo:OMIT_0000109>\n" +
-                        "\t</owl:NamedIndividual>\n";
-
-                    // Add the Gene to the Gene list
-                    genes.Add(new Gene("OMIT_" + omit_iri.ToString("D7"), ln[2], ln[1]));
-
-                    // Increment the OMIT IRI
-                    ++omit_iri;
-
-                    // Write the Gene to the genes.owl file
-                    sw2.WriteLine(geneTxt);
-                }
-
-                // Find the Gene object
-                Gene gene = genes.Find(g => g.Symbol == ln[2]);
-                // If not found
-                if (gene == null)
-                {
-                    // Throw an exception
-                    throw new Exception("GENE MISSING");
-                }
-
-                // Find the miRNA object
-                MiRNA mirna = mirnas.Find(m => m.Label == ln[0]);
-                // If not found
-                if (mirna == null)
-                {
-                    // Throw an exception
-                    throw new Exception("MIRNA MISSING");
-                }
-
-                // Construct the targetscan.org Prediction owl entry
-                String predTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                    "\t\t<rdf:type rdf:resource=\"&obo;OMIT_0000019\"/>\n" +
-                    "\t\t<obo:OMIT_0000108 rdf:datatype=\"&xsd;decimal\">" + ln[3] + "</obo:OMIT_0000108>\n" +
-                    "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + mirna.IRI + "\"/>\n" +
-                    "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + gene.IRI + "\"/>\n" +
-                    "\t</owl:NamedIndividual>\n";
+                // Construct the targetscan.org triples
+                String predTxt =
+                    iri + " rdf:type obo:OMIT_0000019 .\r\n" +
+                    iri + " obo:OMIT_0000159 obo:" + mirna.IRI + " .\r\n" +
+                    iri + " obo:OMIT_0000160 obo:" + gene.IRI + " .\r\n" +
+                    iri + " obo:OMIT_0000108 \"" + ln[3] + "\"^^xsd:integer .\r\n";
 
                 // Increment the OMIT IRI
                 ++omit_iri;
@@ -279,75 +197,25 @@ namespace GeneData
             Console.WriteLine("Generating miRanda Data...");
 
             // While microRNA.org data is available
-            while (!sr3.EndOfStream)
+            while (!sr4.EndOfStream)
             {
                 // Read line and split by tab character
-                String[] ln = sr3.ReadLine().Split("\t".ToCharArray());
+                String[] ln = sr4.ReadLine().Split("\t".ToCharArray());
 
-                // If the miRNA has not been generated
-                if (mirnas.Find(m => m.Label == ln[0]) == null)
-                {
-                    // Construct the miRNA owl entry
-                    String mirnaTxt = "\t<owl:Class rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdfs:subClassOf rdf:resource=\"&obo;NCRO_0000810\"/>\n" +
-                        "\t\t<rdfs:label rdf:datatype=\"&xsd;string\">" + ln[0] + "</rdfs:label>\n" +
-                        "\t</owl:Class>\n";
+                // Get the mirna
+                MiRNA mirna = GetMiRNA(ln[0]);
 
-                    // Add the new miRNA to the miRNA list
-                    mirnas.Add(new MiRNA("OMIT_" + omit_iri.ToString("D7"), ln[0]));
+                // Get the gene
+                Gene gene = GetGene(ln[2], ln[1]);
 
-                    // Increment the OMIT IRI
-                    ++omit_iri;
+                String iri = "obo:OMIT_" + omit_iri.ToString("D7");
 
-                    // Write the miRNA to the mirna.owl file
-                    sw1.WriteLine(mirnaTxt);
-                }
-
-                // If the Gene has not been generated
-                if (genes.Find(g => g.Symbol == ln[2]) == null)
-                {
-                    // Construct the Gene owl entry
-                    String geneTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdf:type rdf:resource=\"&obo;NCRO_0000025\"/>\n" +
-                        "\t\t<rdfs:label rdf:datatype=\"&xsd;string\">" + ln[2] + "</rdfs:label>\n" +
-                        "\t\t<obo:OMIT_0000109 rdf:datatype=\"&xsd;string\">" + ln[1] + "</obo:OMIT_0000109>\n" +
-                        "\t</owl:NamedIndividual>\n";
-
-                    // Add the Gene to the Gene list
-                    genes.Add(new Gene("OMIT_" + omit_iri.ToString("D7"), ln[2], ln[1]));
-
-                    // Increment the OMIT IRI
-                    ++omit_iri;
-
-                    // Write the Gene to the genes.owl file
-                    sw2.WriteLine(geneTxt);
-                }
-
-                // Find the Gene object
-                Gene gene = genes.Find(g => g.Symbol == ln[2]);
-                // If not found
-                if (gene == null)
-                {
-                    // Throw an exception
-                    throw new Exception("GENE MISSING");
-                }
-
-                // Find the miRNA object
-                MiRNA mirna = mirnas.Find(m => m.Label == ln[0]);
-                // If not found
-                if (mirna == null)
-                {
-                    // Throw an exception
-                    throw new Exception("MIRNA MISSING");
-                }
-
-                // Construct the targetscan.org Prediction owl entry
-                String predTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                    "\t\t<rdf:type rdf:resource=\"&obo;OMIT_0000021\"/>\n" +
-                    "\t\t<obo:OMIT_0000108 rdf:datatype=\"&xsd;decimal\">" + ln[3] + "</obo:OMIT_0000108>\n" +
-                    "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + mirna.IRI + "\"/>\n" +
-                    "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + gene.IRI + "\"/>\n" +
-                    "\t</owl:NamedIndividual>\n";
+                // Construct the miRanda.org triples
+                String predTxt =
+                    iri + " rdf:type obo:OMIT_0000021 .\r\n" +
+                    iri + " obo:OMIT_0000159 obo:" + mirna.IRI + " .\r\n" +
+                    iri + " obo:OMIT_0000160 obo:" + gene.IRI + " .\r\n" +
+                    iri + " obo:OMIT_0000108 \"" + ln[3] + "\"^^xsd:decimal .\r\n";
 
                 // Increment the OMIT IRI
                 ++omit_iri;
@@ -360,42 +228,36 @@ namespace GeneData
             Console.WriteLine("Generating PubMed Data...");
 
             // While pubmed data is available
-            while (!sr4.EndOfStream)
+            while (!sr5.EndOfStream)
             {
                 // Read line and split by tab character
-                String[] ln = sr4.ReadLine().Split("\t".ToCharArray());
+                String[] ln = sr5.ReadLine().Split("\t".ToCharArray());
 
                 // Find the Gene object
                 Gene gene = genes.Find(g => g.ID == ln[0]);
+
                 // Find the MeSH Term object
-                MeshTerm term = meshTerms.Find(m => m.Label.ToLower() == ln[2].ToLower());
+                MeshTerm term = meshTerms.Find(m => m.Label == ln[2]);
 
                 // If both were found
                 if (gene != null && term != null)
                 {
-                    // Construct the PubMed owl entry
-                    String pmidTxt = "\t<owl:NamedIndividual rdf:about=\"&obo;OMIT_" + omit_iri.ToString("D7") + "\">\n" +
-                        "\t\t<rdf:type rdf:resource=\"&obo;OMIT_0000003\"/>\n" +
-                        "\t\t<obo:BFO_0000051 rdf:resource=\"&obo;" + term.IRI + "\"/>\n" +
-                        "\t\t<obo:OMIT_0000151 rdf:datatype=\"&xsd;string\">" + ln[1] + "</obo:OMIT_0000151>\n" +
-                        "\t\t<obo:RO_0000057 rdf:resource=\"&obo;" + gene.IRI + "\"/>\n" +
-                        "\t</owl:NamedIndividual>\n";
+                    String iri = "obo:OMIT_" + omit_iri.ToString("D7");
+
+                    // Construct the PubMed triples
+                    String pmedTxt =
+                        iri + " rdf:type obo:OMIT_0000003 .\r\n" +
+                        iri + " obo:BFO_0000051 obo:" + term.IRI + " .\r\n" +
+                        iri + " obo:OMIT_0000160 obo:" + gene.IRI + " .\r\n" +
+                        iri + " obo:OMIT_0000151 \"" + ln[1] + "\"^^xsd:string .\r\n";
 
                     // Increment the OMIT IRI
                     ++omit_iri;
 
                     // Write the PubMed to the pubmed.owl file
-                    sw6.WriteLine(pmidTxt);
+                    sw6.WriteLine(pmedTxt);
                 }
             }
-
-            // Write the RDF Footer to the output files
-            sw1.Write("\n</rdf:RDF>");
-            sw2.Write("\n</rdf:RDF>");
-            sw3.Write("\n</rdf:RDF>");
-            sw4.Write("\n</rdf:RDF>");
-            sw5.Write("\n</rdf:RDF>");
-            sw6.Write("\n</rdf:RDF>");
 
             // Close all files
             sw1.Close();
@@ -409,6 +271,74 @@ namespace GeneData
             sr3.Close();
             sr4.Close();
             sr5.Close();
+            sr6.Close();
+        }
+
+        public static MiRNA GetMiRNA(string label)
+        {
+            // Get the miRNA from the list
+            MiRNA mirna = mirnas.Find(m => m.Label == label);
+
+            // If the miRNA was found
+            if (mirna != null)
+                // Return the miRNA
+                return mirna;
+
+            String iri = "OMIT_" + omit_iri.ToString("D7");
+
+            // Construct the mirna triple
+            String mirnaTxt =
+                "obo:" + iri + " rdfs:subClassOf obo:NCRO_0000810 .\r\n" +
+                "obo:" + iri + " rdfs:label \"" + label + "\"^^xsd:string .\r\n";
+
+            // Create an instance of the new miRNA
+            mirna = new MiRNA(iri, label);
+
+            // Add the new miRNA to the miRNA list
+            mirnas.Add(mirna);
+
+            // Increment the OMIT IRI
+            ++omit_iri;
+
+            // Write the miRNA to the mirna.owl file
+            sw1.WriteLine(mirnaTxt);
+
+            // Return the miRNA
+            return mirna;
+        }
+
+        public static Gene GetGene(string symbol, string id)
+        {
+            // Get the gene from the list
+            Gene gene = genes.Find(g => g.Symbol == symbol);
+
+            // If the gene was found
+            if (gene != null)
+                // Return the gene
+                return gene;
+
+            String iri = "OMIT_" + omit_iri.ToString("D7");
+
+            // Construct the gene triple
+            String geneTxt =
+                "obo:" + iri + " rdf:type obo:NCRO_0000025 .\r\n" +
+                "obo:" + iri + " rdfs:label \"" + symbol + "\"^^xsd:string .\r\n" +
+                "obo:" + iri + " obo:OMIT_0000109 \"" + id + "\"^^xsd:string .\r\n";
+
+            // Create an instance of the new gene
+            gene = new Gene(iri, symbol, id);
+
+            // Add the Gene to the Gene list
+            genes.Add(gene);
+
+            // Increment the OMIT IRI
+            ++omit_iri;
+
+            // Write the Gene to the genes.owl file
+            sw2.WriteLine(geneTxt);
+
+            // Return the gene
+            return gene;
         }
     }
 

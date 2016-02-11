@@ -97,6 +97,24 @@ try {
     if ($format === 'tsv' || $format === 'csv') {
         // Loop through all targets
         foreach ($json['results']['bindings'] as $target) {
+<<<<<<< HEAD
+            // Holds pumbed id count
+            $pubmed_count = 0;
+            // If pubmed ids are available
+            if (!empty($target['pubmed_ids']['value'])) {
+                // Get the pubmed count
+                $pubmed_count = count(explode(',', $target['pubmed_ids']['value']));
+            }
+
+            // If tab-separated values
+            if ($format === 'tsv') {
+                // Concatenate the target information
+                $text .= $target['gene_symbol']['value'] . "\tmiRDB\t\t# of filtered publications: " . $pubmed_count . "\t\t\t" . $target['gene_symbol']['value'] . "\r\n\tTargetScan\t" . $mirna . "-Specific\tmRNA\r\n\tmicroRNA.org\r\n";
+            } // Else if comma-separated values
+            else if ($format === 'csv') {
+                // Concatenate the target information
+                $text .= $target['gene_symbol']['value'] . ",\"miRDB\r\nTargetScan\r\nmicroRNA.org\",\"# of filtered publications: " . $pubmed_count . "\r\n" . $mirna . "-Specific\",\"" . $target['gene_symbol']['value'] . "\r\nmRNA\"\r\n";
+=======
             // If tab-separated values
             if ($format === 'tsv') {
                 // Concatenate the target information
@@ -105,6 +123,7 @@ try {
             else if ($format === 'csv') {
                 // Concatenate the target information
                 $text .= $target['gene_symbol']['value'] . ",\"miRDB\r\nTargetScan\r\nmicroRNA.org\",\"All\r\n" . $mirna . "-Specific\",\"" . $target['gene_symbol']['value'] . "\r\nmRNA\"\r\n";
+>>>>>>> origin/master
             }
         }
 

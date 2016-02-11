@@ -8,7 +8,11 @@
     <title>OmniSearch</title>
 
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+<<<<<<< HEAD
+    <link rel="stylesheet" href="css/omnisearch.css"/>
+=======
     <link rel="stylesheet" href="/css/omnisearch.css"/>
+>>>>>>> origin/master
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -18,13 +22,29 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<<<<<<< HEAD
+    <script src="js/omnisearch.js"></script>
+=======
     <script src="/js/omnisearch.js"></script>
+>>>>>>> origin/master
 </head>
 <body>
 <div style="display: table; margin: 0 auto">
     <table style="width: 100%">
         <tr>
             <td>
+<<<<<<< HEAD
+                <h4 class="pull-right"><a href="/wiki">OmniSearch Wiki</a></h4>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="images/logo-ui.png" class="img-responsive" style="margin: 0 auto; height: 150px"/>
+            </td>
+        </tr>
+    </table>
+    <br/>
+=======
                 <img src="/images/logo.png" class="img-responsive" style="margin: 0; height: 150px"/>
             </td>
             <td>
@@ -32,6 +52,7 @@
             </td>
         </tr>
     </table>
+>>>>>>> origin/master
     <!--
     <br/>
     <p style="text-align: center">All software tools developed in the OmniSearch project can be downloaded here. <a href="https://github.com/OmniSearch/Software" target="_blank">[Executable]</a>&nbsp;&nbsp;<a href="https://github.com/OmniSearch/Software" target="_blank">[Source]</a></p>
@@ -216,6 +237,12 @@
                     <option value="has_pubmed">Has Publications</option>
                     <option value="no_pubmed">No Publications</option>
                 </select>
+<<<<<<< HEAD
+                <br/><br/>
+                RNA Central Annotation:
+                <span id="rna_central_annotation"></span>
+=======
+>>>>>>> origin/master
             </th>
         </tr>
         <tr>

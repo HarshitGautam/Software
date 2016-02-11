@@ -246,7 +246,11 @@ $(document).ready(function () {
         if ($(this).is(':checked')) {
             $('#select_all_cb').prop('disabled', true);
 
+<<<<<<< HEAD
+            $.get('search.php', {
+=======
             $.get('/search.php', {
+>>>>>>> origin/master
                     type: 'select_all',
                     mirna: mirna,
                     term: term,
@@ -261,7 +265,11 @@ $(document).ready(function () {
                     $('#results_body').find('input[type=checkbox]').prop('checked', true);
                 })
                 .fail(function () {
+<<<<<<< HEAD
+                    window.location.href = "error.php";
+=======
                     window.location.href = "/error.php";
+>>>>>>> origin/master
                 })
                 .always(function () {
                     $('#select_all_cb').prop('disabled', false);
@@ -289,17 +297,59 @@ $(document).ready(function () {
         $('#results').find('tbody').html('<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>');
         $('#results_controls').find('input, button, select').prop('disabled', true);
         $('#limit_select').find('option:first').prop('selected', true);
+<<<<<<< HEAD
+        $('#sort_by_select').prop('disabled', true).find('option:first').prop('selected', true);
+        $('#predicted_by_select').prop('disabled', true).find('option:first').prop('selected', true);
+        $('#publication_filter_select').prop('disabled', true).find('option:first').prop('selected', true);
+=======
+>>>>>>> origin/master
         $('#select_all_cb').prop('checked', false).prop('disabled', true);
         $('#term_lbl').text('');
         $('#page_txt').val('0');
         $('#page_count_lbl').text('0');
-        selected = [];
+        $('#rna_central_annotation').html('');
+
         page = 1;
         page_count = 1;
         target_count = 0;
         downloaded = false;
+        selected = [];
+
+        publication_filter = 'all';
+        predicted_by = 'any';
+        sort_by = 'mirdb';
+        limit = 5;
     });
 
+    //--------------------------------------
+    //              FILTERS
+    //--------------------------------------
+    $('#publication_filter_select').on('change', function () {
+        publication_filter = $(this).val();
+        $('#select_all_cb').prop('checked', false);
+        selected = [];
+        search();
+    });
+
+    $('#predicted_by_select').on('change', function () {
+        predicted_by = $(this).val();
+        $('#select_all_cb').prop('checked', false);
+        selected = [];
+        search();
+    });
+
+<<<<<<< HEAD
+    $('#sort_by_select').on('change', function () {
+        sort_by = $(this).val();
+        search();
+    });
+
+    $('#limit_select').on('change', function () {
+        limit = $(this).val();
+        search();
+    });
+
+=======
     //--------------------------------------
     //              FILTERS
     //--------------------------------------
@@ -323,6 +373,7 @@ $(document).ready(function () {
         search();
     });
 
+>>>>>>> origin/master
     //--------------------------------------
     //          DOWNLOAD RESULTS
     //--------------------------------------
@@ -352,7 +403,11 @@ $(document).ready(function () {
     $('#download_results_btn').on('click', function () {
         var select_all_cb = $('#select_all_cb');
 
+<<<<<<< HEAD
+        $('#selected_count_lbl').text(selected.length);
+=======
         $('#selected_count_lbl').text(select_all_cb.is(':checked') ? target_count : selected.length);
+>>>>>>> origin/master
 
         if (!select_all_cb.is(':checked') && selected.length === 0) {
             $('#download_all_radio').prop('checked', true);
@@ -373,7 +428,11 @@ $(document).ready(function () {
             downloaded = true;
         }
 
+<<<<<<< HEAD
+        window.open('download.php?' +
+=======
         window.open('/download.php?' +
+>>>>>>> origin/master
             'mirna=' + mirna +
             '&term=' + term +
             '&sort_by=' + sort_by +
@@ -382,6 +441,7 @@ $(document).ready(function () {
             '&format=' + format +
             '&selected=' + selected.toString(),
             '_blank');
+<<<<<<< HEAD
     });
 
     //--------------------------------------
@@ -391,6 +451,17 @@ $(document).ready(function () {
         $('#david_tool_select').prop('disabled', downloaded);
     });
 
+=======
+    });
+
+    //--------------------------------------
+    //          ANALYZE RESULTS
+    //--------------------------------------
+    $('#perform_analysis_btn').on('click', function () {
+        $('#david_tool_select').prop('disabled', downloaded);
+    });
+
+>>>>>>> origin/master
     $('#david_btn').on('click', function () {
         $('#perform_analysis_div').hide();
 
@@ -429,7 +500,11 @@ $(document).ready(function () {
 
         $('#mirna_searchbox_div').html('<h5>Searching...</h5>').show();
 
+<<<<<<< HEAD
+        $.get('query.php', {mirna: $('#mirna_searchbox_input').val().trim()})
+=======
         $.get('/query.php', {mirna: $('#mirna_searchbox_input').val().trim()})
+>>>>>>> origin/master
             .done(function (data) {
                 $('#mirna_searchbox_div').html(data);
                 setTimeout(function () {
@@ -448,7 +523,11 @@ $(document).ready(function () {
 
         $('#term_searchbox_div').html('<h5>Searching...</h5>').show();
 
+<<<<<<< HEAD
+        $.get('query.php', {term: $('#term_searchbox_input').val().trim()})
+=======
         $.get('/query.php', {term: $('#term_searchbox_input').val().trim()})
+>>>>>>> origin/master
             .done(function (data) {
                 $('#term_searchbox_div').html(data);
                 setTimeout(function () {
@@ -468,7 +547,11 @@ $(document).ready(function () {
 
         $('input, button, select').prop('disabled', true);
 
+<<<<<<< HEAD
+        $.getJSON('search.php',
+=======
         $.getJSON('/search.php',
+>>>>>>> origin/master
             {
                 type: 'search',
                 mirna: mirna,
@@ -489,6 +572,10 @@ $(document).ready(function () {
                     page_count = data.page_count;
                     target_count = data.target_count;
 
+<<<<<<< HEAD
+                    $('#rna_central_annotation').html('<a href="http://rnacentral.org/search?q=' + mirna + ' AND TAXONOMY:&quot;9606&quot;" target="_blank">' + mirna + '</a>')
+=======
+>>>>>>> origin/master
                     page_txt.val(page);
                     page_count_lbl.text(page_count);
                     $('#total_count_lbl').text(target_count);
@@ -530,11 +617,19 @@ $(document).ready(function () {
                 else {
                     $('#results_body').html('<tr><td colspan="5"><h4>No results found</h4></td></tr>');
                     page_txt.val('0');
+<<<<<<< HEAD
+                    page_count_lbl.text('0');
+                }
+            })
+            .fail(function (error) {
+                window.location.href = "error.php";
+=======
                     page_count_lbl.text('0)');
                 }
             })
             .fail(function (error) {
                 window.location.href = "/error.php";
+>>>>>>> origin/master
             })
             .always(function () {
                 $('#search_controls').find('input, button, select').prop('disabled', false);

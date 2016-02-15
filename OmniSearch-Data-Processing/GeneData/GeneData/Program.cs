@@ -247,7 +247,7 @@ namespace GeneData
                     // Construct the PubMed triples
                     String pmedTxt =
                         iri + " rdf:type obo:OMIT_0000003 .\r\n" +
-                        iri + " obo:BFO_0000051 obo:" + term.IRI + " .\r\n" +
+                        iri + " obo:OMIT_0000161 obo:" + term.IRI + " .\r\n" +
                         iri + " obo:OMIT_0000160 obo:" + gene.IRI + " .\r\n" +
                         iri + " obo:OMIT_0000151 \"" + ln[1] + "\"^^xsd:string .\r\n";
 

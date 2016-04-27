@@ -1,0 +1,24 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?plabel (GROUP_CONCAT (DISTINCT ?clabel; SEPARATOR=";") AS ?children)
+WHERE {
+	# Get all IRI's and their associated labels
+	?parent rdfs:label ?plabel .
+	# Filter IRI's by label that contain the substring "Drug Resistance"
+	FILTER regex(?plabel, "Drug Resistance", "i")
+	# Restrict IRI's to be a subClassOf the MeSH class
+	?parent (rdfs:subClassOf)+ obo:OMIT_0000110
+	OPTIONAL {
+		# Get all child IRI's of the current MeSH
+		?child rdfs:subClassOf ?parent .
+		# Get the label of the MeSH
+		?child rdfs:label ?clabel
+		# Filter IRI's by label that contain the substring "Drug Resistance"
+		FILTER regex(?clabel, "Drug Resistance", "i")
+	}
+}
+GROUP BY ?plabel
+ORDER BY ?plabel
+LIMIT 20

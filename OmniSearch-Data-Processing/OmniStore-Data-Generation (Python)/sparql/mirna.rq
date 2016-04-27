@@ -1,0 +1,13 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+SELECT ?label
+WHERE {
+	# Get all IRI's that are a subClassOf human_miRNA
+	?child rdfs:subClassOf obo:NCRO_0000810 .
+	# Get the label of the current IRI
+	?child rdfs:label ?label
+	# Filter IRI's by label that contain the substring "hsa-miR-125b-5p"
+	FILTER REGEX(?label, "hsa-miR-125b-5p", "i")
+}
+ORDER BY ?label

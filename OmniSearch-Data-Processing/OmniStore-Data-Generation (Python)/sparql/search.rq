@@ -1,0 +1,64 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#>
+
+SELECT ?gene_symbol ?gene_name
+(MAX(COALESCE(?go_count, 0)) AS ?amigo_count)
+(MAX(COALESCE(?mdb_score, -9999)) AS ?mirdb_score)
+(MAX(COALESCE(?ts_score, -9999)) AS ?targetscan_score)
+(MAX(COALESCE(ABS(?mrnd_score), -9999)) AS ?miranda_score)
+(GROUP_CONCAT(COALESCE(?mtb_id, ""); SEPARATOR="") AS ?mirtarbase_id)
+(GROUP_CONCAT (DISTINCT ?pubmed_id; SEPARATOR=",") AS ?pubmed_ids)
+WHERE {
+	# Get the human_miRNA IRI with label "hsa-miR-125b-5p"
+	?mirna rdfs:label "hsa-miR-125b-5p" .
+	# Get the prediction instance containing this IRI
+	?prediction obo:OMIT_0000159 ?mirna .
+	# Get the miRNA_target_gene IRI for this prediction
+	?prediction obo:OMIT_0000160 ?target .
+	# Get the gene symbol
+	?target rdfs:label ?gene_symbol .
+	# Get the gene name
+	?target rdfs:comment ?gene_name .
+	OPTIONAL {
+		# Get the amigo go count for this target gene
+		?target obo:OMIT_0000169 ?go_count
+	}
+	OPTIONAL {
+		# Get the targetscan score
+		?prediction rdf:type obo:OMIT_0000019 .
+		?prediction obo:OMIT_0000108 ?ts_score
+	}
+	OPTIONAL {
+		# Get the mirdb score
+		?prediction rdf:type obo:OMIT_0000020 .
+		?prediction obo:OMIT_0000108 ?mdb_score
+	}
+	OPTIONAL {
+		# Get the miranda score
+		?prediction rdf:type obo:OMIT_0000021 .
+		?prediction obo:OMIT_0000108 ?mrnd_score
+	}
+	OPTIONAL {
+		# Get the mirtarbase id
+		?prediction rdf:type obo:OMIT_0000174 .
+		?prediction oboInOwl:hasDbXref ?mirtarbase_id
+	}
+	OPTIONAL {
+		# Get the MeSH term IRI with the label "Drug Resistance"
+		?mesh_term rdfs:label "Drug Resistance" .
+		# Get all children of the MeSH term
+		?child (rdfs:subClassOf)* ?mesh_term .
+		# Get all pubmed ids that are related to the children MeSH terms
+		# and the miRNA and the target gene.
+		?child obo:OMIT_0000151 ?pubmed_id .
+		?mirna obo:OMIT_0000151 ?pubmed_id .
+		?target obo:OMIT_0000151 ?pubmed_id
+	}
+}
+GROUP BY ?gene_symbol ?gene_name
+#HAVING(BOUND(?pubmed_ids))
+#HAVING(!BOUND(?pubmed_ids))
+#HAVING(?mirdb_score != -9999 && ?targetscan_score != -9999 && ?miranda_score != -9999)
+ORDER BY DESC(?mirdb_score)

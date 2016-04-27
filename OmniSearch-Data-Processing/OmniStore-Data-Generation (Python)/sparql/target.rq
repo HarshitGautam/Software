@@ -1,0 +1,24 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+SELECT ?mirna_name (COUNT(?target2) AS ?target_count)
+WHERE {
+  {
+    SELECT DISTINCT ?mirna ?mirna_name
+    WHERE {
+	  # Get the target gene with label "IRF4"
+      ?target1 rdfs:label "IRF4" .
+	  # Get the prediction instance for this target gene
+      ?source1 obo:OMIT_0000160 ?target1 .
+	  # Get the miRNA for this prediction
+      ?source1 obo:OMIT_0000159 ?mirna .
+	  # Get the miRNA label
+      ?mirna rdfs:label ?mirna_name
+    }
+  }
+  # Get the prediction for this miRNA
+  ?source2 obo:OMIT_0000159 ?mirna .
+  # Get all target genes for this prediction
+  ?source2 obo:OMIT_0000160 ?target2
+}
+GROUP BY ?mirna_name

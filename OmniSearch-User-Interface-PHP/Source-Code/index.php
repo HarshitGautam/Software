@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>OmniSearch</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/ui/">OmniSearch UI</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/ui/about.php">About</a></li>
+                <li><a href="/ui/help.php">Help</a></li>
+                <li><a href="/ui/feedback.php">Feedback</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="header">
+    <form id="search_form" autocomplete="off">
+        <h2>Search for microRNA targets</h2>
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <div class="searchbox">
+                    <label for="mirna">
+                        Enter a microRNA name
+                        <span class="glyphicon glyphicon-question-sign pull-right" style="color: yellow" data-toggle="tooltip" data-placement="left" title="Begin typing a complete microRNA name or part of such a name. Or simply press the down-arrow key without typing anything."></span>
+                    </label>
+                    <input id="mirna" type="text" class="form-control" required/>
+                    <div></div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4">
+                <div class="searchbox">
+                    <label for="mesh">
+                        Enter a MeSH Term (Optional)
+                        <span class="glyphicon glyphicon-question-sign pull-right" style="color: yellow" data-toggle="tooltip" data-placement="left" title="Begin typing a complete MeSH Term or part of such a term. Or simply press the down-arrow key without typing anything."></span>
+                    </label>
+                    <input id="mesh" type="text" class="form-control"/>
+                    <div></div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <label style="display: block">&nbsp;
+                    <span class="glyphicon glyphicon-question-sign pull-right" style="color: yellow" data-toggle="tooltip" data-placement="left" data-container="body" title="Click the button below to change various filters."></span>
+                </label>
+                <button id="filter_btn" type="button" class="btn btn-default btn-block" onclick="$('#analysis_panel').hide(); $('#download_panel').hide(); $('#filter_panel').toggle()">
+                    <span class="glyphicon glyphicon-filter"></span><span> Filters</span>
+                </button>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn btn-default btn-block">
+                    <span class="glyphicon glyphicon-search"></span><span> Search</span>
+                </button>
+            </div>
+        </div>
+    </form>
+    <div id="result_controls">
+        <a id="rna_central_link" href="" target="_blank" class="btn btn-default">
+            <span class="glyphicon glyphicon-link"></span> RNA Central
+        </a>
+        <button class="btn btn-default" type="button" onclick="$('#filter_panel').hide(); $('#download_panel').hide(); $('#analysis_panel').toggle()">
+            <span class="glyphicon glyphicon-stats"></span> Perform Analysis
+        </button>
+        <button class="btn btn-default" type="button" onclick="$('#filter_panel').hide(); $('#analysis_panel').hide(); $('#download_panel').toggle()">
+            <span class="glyphicon glyphicon-download-alt"></span> Download Results
+        </button>
+        <button class="btn btn-default" type="button" onclick="reset()">
+            <span class="glyphicon glyphicon-remove"></span> Clear Results
+        </button>
+    </div>
+</div>
+<div id="wrapper">
+    <div id="filter_panel" class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Data Source Filter <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="left" title="Select one or more data sources to be included in the result set. Unchecked data sources will be excluded."></span></th>
+                <th>Validation Filter</th>
+                <th>Publications Filter</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" name="database_filter" value="mirdb" autocomplete="off">miRDB</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" name="database_filter" value="targetscan" autocomplete="off">TargetScan</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" name="database_filter" value="miranda" autocomplete="off">miRanda</label>
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" name="database_filter" value="mirtarbase" autocomplete="off">miRTarBase</label>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <div class="radio">
+                            <label><input type="radio" name="validation_filter" value="all" autocomplete="off" checked>Show All</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="validation_filter" value="predicted" autocomplete="off">Show Predicted Targets Only</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="validation_filter" value="validated" autocomplete="off">Show Validated Targets Only</label>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <div class="radio">
+                            <label><input type="radio" name="pubmed_filter" value="all" autocomplete="off" checked>Show All</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="pubmed_filter" value="no" autocomplete="off">Without Publications</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="pubmed_filter" value="has" autocomplete="off">With Publications</label>
+                        </div>
+                    </div>
+					<br/>
+					<div>
+						<div class="checkbox">
+                            <label><input type="checkbox" name="mirna_pubmed_filter" value="mirna" autocomplete="off" checked>Filtered by microRNA</label>
+                        </div>
+					</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button id="apply_btn1" type="button" class="btn btn-default" onclick="selected = []; $('#download_selected_lbl').text(selected.length); search()" autocomplete="off" disabled>Apply Now</button>
+                </td>
+                <td>
+                    <button id="apply_btn2" type="button" class="btn btn-default" onclick="selected = []; $('#download_selected_lbl').text(selected.length); search()" autocomplete="off" disabled>Apply Now</button>
+                </td>
+                <td>
+                    <button id="apply_btn3" type="button" class="btn btn-default" onclick="selected = []; $('#download_selected_lbl').text(selected.length); search()" autocomplete="off" disabled>Apply Now</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="download_panel" class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th width="50%">Selection</th>
+                <th width="50%">File Format</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <div class="radio">
+                            <label><input type="radio" name="download_radio" value="all" autocomplete="off" checked>Download the whole table (<span id="download_all_lbl">0</span>)</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="download_radio" value="selected" autocomplete="off" disabled>Download selected targets (<span id="download_selected_lbl">0</span>)</label>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <div class="radio">
+                            <label><input type="radio" name="format_radio" value="tsv" autocomplete="off" checked>Tab-delimited text</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="format_radio" value="csv" autocomplete="off">CSV format</label>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button id="download_btn" class="btn btn-default" type="button">Download</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="analysis_panel" class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th width="50%">Select DAVID Tool</th>
+                <th width="50%">Select PANTHER Tool</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <select id="david_tool_select" class="form-control" style="width: auto; margin: auto" autocomplete="off">
+                        <option value="gene2gene">Gene Functional Classification</option>
+                        <option value="term2term">Funtional Annotation Clustering</option>
+                        <option value="summary" selected>Functional Annotation Summary</option>
+                        <option value="chartReport">Functional Annotation Chart</option>
+                        <option value="annotationReport">Functional Annotation Table</option>
+                        <option value="list" selected>Show Gene List Names in Batch</option>
+                        <option value="geneReport">Gene Report</option>
+                        <option value="geneReportFull">Gene Full Report</option>
+                    </select>
+                </td>
+                <td>
+                    <select id="panther_tool_select" class="form-control" style="width: auto; margin: auto" autocomplete="off">
+                        <option value="biological_process" selected>biological process</option>
+                        <option value="molecular_function">molecular function</option>
+                        <option value="cellular_component">cellular component</option>
+                        <option value="biological_process_exp">biological process (experimental only)</option>
+                        <option value="molecular_function_exp">molecular function (experimental only)</option>
+                        <option value="cellular_component_exp">cellular component (experimental only)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button id="analyze_david_btn" class="btn btn-default" type="button" onclick="analyze_david()">Analyze</button>
+                </td>
+                <td>
+                    <button id="analyze_panther_btn" class="btn btn-default" type="button" onclick="analyze_panther()">Analyze</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="error_panel"></div>
+    <div id="content">
+        <div id="page_controls" class="row">
+            <div class="col-md-2 col-sm-2">
+                <label for="rows_select">Rows per page</label>
+                <select id="rows_select" class="form-control" style="width: 100%" autocomplete="off">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100" selected>100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="col-md-8 col-sm-8" style="text-align: center">
+                <label><span id="total_span"></span></label>
+                <nav>
+                    <ul class="pagination">
+                        <li><button id="first_btn" type="button" onclick="first()">&laquo;</button></li>
+                        <li><button id="prev_btn" type="button"  onclick="prev()">&lsaquo;</button></li>
+                        <li><label>Page <span id="page_span">0</span> of <span id="pages_span">0</span></label></li>
+                        <li><button id="next_btn" type="button"  onclick="next()">&rsaquo;</button></li>
+                        <li><button id="last_btn" type="button"  onclick="last()">&raquo;</button></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="col-md-2 col-sm-2">
+                <form id="goto_page_form" autocomplete="off">
+                    <label for="page_input">Go to Page</label>
+                    <div class="input-group">
+                        <input id="page_input" type="text" class="form-control" required/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">Go</button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="table_div" class="table-responsive">
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+Ampicillin Resistance	OMIT_0002082
+beta-Lactam Resistance	OMIT_0018640
+Cephalosporin Resistance	OMIT_0018740
+Chloramphenicol Resistance	OMIT_0004026
+Cytoprotection	OMIT_0019628
+Depression, Chemical	OMIT_0005140
+Dose-Response Relationship, Drug	OMIT_0005561
+Down-Regulation	OMIT_0016265
+Drug Agonism	OMIT_0025726
+Drug Antagonism	OMIT_0005592
+Drug Interactions	OMIT_0005603
+Drug Inverse Agonism	OMIT_0025727
+Drug Partial Agonism	OMIT_0025745
+Drug Resistance	OMIT_0005607
+Drug Resistance, Bacterial	OMIT_0021098
+Drug Resistance, Fungal	OMIT_0021118
+Drug Resistance, Microbial	OMIT_0005608
+Drug Resistance, Multiple	OMIT_0018633
+Drug Resistance, Multiple, Bacterial	OMIT_0021100
+Drug Resistance, Multiple, Fungal	OMIT_0021201
+Drug Resistance, Multiple, Viral	OMIT_0021101
+Drug Resistance, Neoplasm	OMIT_0019125
+Drug Resistance, Viral	OMIT_0021099
+Drug Synergism	OMIT_0005613
+Drug Tolerance	OMIT_0005617
+Food-Drug Interactions	OMIT_0018751
+Herb-Drug Interactions	OMIT_0023079
+Herbicide Resistance	OMIT_0025284
+Hormesis	OMIT_0027531
+Insecticide Resistance	OMIT_0008430
+Insulin Resistance	OMIT_0008453
+Kanamycin Resistance	OMIT_0008724
+Lethal Dose 50	OMIT_0009020
+Metabolic Syndrome X	OMIT_0021094
+Methicillin Resistance	OMIT_0016670
+Penicillin Resistance	OMIT_0011397
+Quantitative Structure-Activity Relationship	OMIT_0020804
+Stimulation, Chemical	OMIT_0014143
+Structure-Activity Relationship	OMIT_0014204
+Tachyphylaxis	OMIT_0014477
+Tetracycline Resistance	OMIT_0014607
+Trimethoprim Resistance	OMIT_0015134
+Up-Regulation	OMIT_0016489
+Vancomycin Resistance	OMIT_0020565

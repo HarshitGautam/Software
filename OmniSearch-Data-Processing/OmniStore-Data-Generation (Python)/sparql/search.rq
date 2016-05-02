@@ -43,7 +43,7 @@ WHERE {
 	OPTIONAL {
 		# Get the mirtarbase id
 		?prediction rdf:type obo:OMIT_0000174 .
-		?prediction oboInOwl:hasDbXref ?mirtarbase_id
+		?prediction oboInOwl:hasDbXref ?mtb_id
 	}
 	OPTIONAL {
 		# Get the MeSH term IRI with the label "Drug Resistance"

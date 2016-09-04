@@ -9,9 +9,9 @@ var sort_dir = 'DESC';
 var sort_col = 'mirdb_score';
 var selected = [];
 var validation_filter = 'all';
-var database_filter = [];
+var database_filter = ['mirdb', 'targetscan', 'miranda', 'mirtarbase'];
+var database_operator = 'any';
 var pubmed_filter = 'all';
-var mirna_pubmed_filter = 'true'
 var jqxhr = null;
 
 //-----------------------------------
@@ -35,14 +35,14 @@ function reset() {
     $('#content').hide();
     $('#result_controls').hide();
     $('#rows_select').find('option[value=100]').prop('selected', true);
-
+	$('#download_selected_lbl').text(selected.length);
+    $('#download_partial_lbl').text(selected.length);
+	
     $('#filter_panel').hide();
     $('#download_panel').hide();
     $('#analysis_panel').hide();
 
-    $('#apply_btn1').prop('disabled', true);
-    $('#apply_btn2').prop('disabled', true);
-    $('#apply_btn3').prop('disabled', true);
+    $('#apply_btn').prop('disabled', true);
 }
 
 function disableAll() {
@@ -59,17 +59,30 @@ function enableAll() {
     $('#next_btn').prop('disabled', page == pages);
     $('#last_btn').prop('disabled', page == pages);
 
+    $('[name=database_filter]').prop('checked', false);
+    for (var i = 0; i < database_filter.length; ++i) {
+        $('[name=database_filter][value=' + database_filter[i] + ']').prop('checked', true);
+    }
+    $('[name=database_operator][value=' + database_operator + ']').prop('checked', true);
+    $('[name=validation_filter][value=' + validation_filter + ']').prop('checked', true);
+    $('[name=pubmed_filter][value=' + pubmed_filter + ']').prop('checked', true);
+
     if (selected.length == 0) {
         $('[name=download_radio][value=selected]').prop('disabled', true);
+        $('[name=download_radio][value=partial]').prop('disabled', true);
         $('[name=download_radio][value=all]').prop('checked', true);
         $('[name=format_radio]').prop('disabled', false);
     }
     else {
         $('[name=download_radio][value=selected]').prop('disabled', false);
+        $('[name=download_radio][value=partial]').prop('disabled', false);
     }
 
     if ($('[name=download_radio][value=selected]').is(':checked')) {
         $('[name=format_radio]').prop('disabled', true);
+    }
+    else {
+        $('[name=format_radio]').prop('disabled', false);
     }
 }
 
@@ -82,8 +95,10 @@ $('body').tooltip({
 
 $(document).on('mousedown', function () {
     $('.searchbox > div').hide();
-    if (jqxhr)
+    if (jqxhr) {
         jqxhr.abort();
+		jqxhr = null;
+	}
 });
 
 //-----------------------------------
@@ -91,6 +106,13 @@ $(document).on('mousedown', function () {
 //-----------------------------------
 $('.searchbox').on('mousedown', 'div', function (e) {
     e.stopPropagation();
+});
+
+$('.searchbox').on('blur', function() {
+	if (jqxhr) {
+        jqxhr.abort();
+		jqxhr = null;
+	}
 });
 
 $('.searchbox').on('click', 'div > ul > li', function () {
@@ -169,15 +191,15 @@ $('#mesh')
 //         SEARCHBOX QUERY
 //-----------------------------------
 function query(type, focus) {
-    /* TODO: cleanup this function */
-
     if (focus)
         $('#' + type).prop('disabled', true);
 
     $('#' + type).next().html('<h5>Searching...</h5>').show();
 
-    if (jqxhr)
+    if (jqxhr) {
         jqxhr.abort();
+		jqxhr = null;
+	}
 
     jqxhr = $.get('query.php', {
             type: type,
@@ -186,7 +208,7 @@ function query(type, focus) {
         })
         .done(function (json) {
             json = JSON.parse(json);
-            if (json.success) {
+            if (json.success && jqxhr) {
                 if (type == 'mirna') {
                     $('#mirna').next().html(json.html).show();
                     $('#mirna').next().find('p').on('click', function () {
@@ -232,9 +254,9 @@ $('#search_form').on('submit', function (e) {
     mirna = $('#mirna').val();
     mesh = $('#mesh').val();
 
-    $('#error_panel').html('<h1>Searching...</h1>').show();
+    $('#error_panel').html('<h2>Searching...</h2>').show();
 
-    search();
+    applyFilters();
 });
 
 function search() {
@@ -253,14 +275,14 @@ function search() {
             selected: JSON.stringify(selected),
             validation_filter: validation_filter,
             database_filter: JSON.stringify(database_filter),
-            pubmed_filter: pubmed_filter,
-			mirna_pubmed_filter: mirna_pubmed_filter
+            database_operator: database_operator,
+            pubmed_filter: pubmed_filter
         })
         .done(function (json) {
 			if(json.length == 0) {
 				$('#content').hide();
                 $('#result_controls').hide();
-                $('#error_panel').html('<h1>Server Timeout</h1>').show();
+                $('#error_panel').html('<h2>Server Timeout</h2>').show();
 				enableAll();
 				return;
 			}
@@ -287,11 +309,13 @@ function search() {
             else {
                 $('#content').hide();
                 $('#result_controls').hide();
-                $('#error_panel').html('<h1>' + json.error + '</h1>').show();
+                $('#error_panel').html('<h2>' + json.error + '</h2>').show();
             }
         })
         .fail(function (jqXHR, textStatus, errorThrown) {
-            alert('DEBUG: ' + textStatus + ':' + errorThrown);
+            $('#content').hide();
+			$('#result_controls').hide();
+			$('#error_panel').html('<h2>Server Timeout</h2>').show();
         })
         .always(function () {
             enableAll();
@@ -301,39 +325,32 @@ function search() {
 //-----------------------------------
 //            FILTERS
 //-----------------------------------
-$('[name=validation_filter]').on('change', function() {
-    validation_filter = $('[name=validation_filter]:checked').val();
-});
+function applyFilters() {
+    selected = [];
+    $('#download_selected_lbl').text(selected.length);
+    $('#download_partial_lbl').text(selected.length);
 
-$('[name=database_filter]').on('change', function() {
     database_filter = $('[name=database_filter]:checked').map(function () {
         return this.value;
     }).get();
-});
-
-$('[name=pubmed_filter]').on('change', function() {
+    database_operator = $('[name=database_operator]:checked').val();
+    validation_filter = $('[name=validation_filter]:checked').val();
     pubmed_filter = $('[name=pubmed_filter]:checked').val();
-});
+
+    search();
+}
 
 $('[name=validation_filter][value=predicted]').on('change', function() {
 	if($('[name=database_filter][value=mirtarbase]').is(':checked')) {
 		alert('There are no predicted results from the miRTarBase data source. This data source will be excluded.');
 		$('[name=database_filter][value=mirtarbase]').prop('checked', false);
-		database_filter = $('[name=database_filter]:checked').map(function () {
-			return this.value;
-		}).get();
 	}
-});
-
-$('[name=mirna_pubmed_filter]').on('change', function() {
-	mirna_pubmed_filter = $(this).is(':checked') ? 'true' : 'false';
 });
 
 $('[name=database_filter][value=mirtarbase]').on('change', function() {
 	if($(this).is(':checked') && $('[name=validation_filter][value=predicted]').is(':checked')) {
 		alert('There are no predicted results from the miRTarBase data source. Both validated and predicted results will be shown.');
 		$('[name=validation_filter][value=all]').prop('checked', true);
-		validation_filter = $('[name=validation_filter]:checked').val();
 	}
 });
 
@@ -342,6 +359,11 @@ $('[name=database_filter][value=mirtarbase]').on('change', function() {
 //-----------------------------------
 $('[name=download_radio][value=all]').on('change', function () {
     if (this.checked)
+        $('[name=format_radio]').prop('disabled', false);
+});
+
+$('[name=download_radio][value=partial]').on('change', function() {
+   if (this.checked)
         $('[name=format_radio]').prop('disabled', false);
 });
 
@@ -375,11 +397,37 @@ $('#download_btn').on('click', function () {
             }
         });
     }
+    else if ($('[name=download_radio][value=partial]').is(':checked')) {
+        $.ajax({
+            type: 'POST',
+            url: 'download.php',
+            data: {
+                format: 'selected',
+                selected: JSON.stringify(selected)
+            },
+            async: false,
+            success: function (json) {
+                json = JSON.parse(json);
+                if (json.success) {
+                    window.open('download.php?format=' + format + '&partial=true&mirna=' + mirna + '&mesh=' + mesh +
+                        '&sort_dir=' + sort_dir + '&sort_col=' + sort_col +
+                        '&validation_filter=' + validation_filter +
+                        '&database_filter=' + JSON.stringify(database_filter) +
+                        '&database_operator=' + database_operator +
+                        '&pubmed_filter=' + pubmed_filter, '_blank');
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(textStatus + ':' + errorThrown);
+            }
+        });
+    }
     else {
         window.open('download.php?format=' + format + '&mirna=' + mirna + '&mesh=' + mesh +
             '&sort_dir=' + sort_dir + '&sort_col=' + sort_col +
             '&validation_filter=' + validation_filter +
             '&database_filter=' + JSON.stringify(database_filter) +
+            '&database_operator=' + database_operator +
             '&pubmed_filter=' + pubmed_filter, '_blank');
     }
 });
@@ -412,7 +460,7 @@ function analyze_panther() {
         return;
     }
 
-    var url = 'http://pantherdb.org/webservices/go/overrep.jsp?correction=bonferroni&format=html&resource=PANTHER&input=' + selected.toString() + '&ontology=' + tool + '&species=HUMAN';
+    var url = 'http://pantherdb.org/webservices/go/overrep.jsp?correction=bonferroni&format=html&resource=PANTHER&input=' + selected.join('%0D%0A') + '&ontology=' + tool + '&species=HUMAN';
     if (url.length > 2048) {
         alert('The generated URL exceeds the maximum size.\nPlease download the selected targets and upload the file in the PANTHER user interface.');
     }
@@ -476,17 +524,20 @@ function last() {
 function selectAll(e) {
     if ($(e).is(':checked')) {
         selected = targets;
-        $('[name=download_radio][value=selected]').prop('disabled', false).prop('checked', true);
-        $('[name=format_radio]').prop('disabled', true);
+        $('[name=download_radio][value=partial]').prop('disabled', false).prop('checked', true);
+        $('[name=download_radio][value=selected]').prop('disabled', false);
+        $('[name=format_radio]').prop('disabled', false);
         $('#results_body').find('input[type=checkbox]').prop('checked', true);
     }
     else {
         selected = [];
         $('[name=download_radio][value=selected]').prop('disabled', true);
+        $('[name=download_radio][value=partial]').prop('disabled', true);
         $('[name=download_radio][value=all]').prop('checked', true);
         $('#results_body').find('input[type=checkbox]').prop('checked', false);
     }
     $('#download_selected_lbl').text(selected.length);
+    $('#download_partial_lbl').text(selected.length);
 }
 
 function onSelect(e) {
@@ -496,19 +547,22 @@ function onSelect(e) {
             $('#select_all').prop('checked', true);
         }
         if (selected.length > 0) {
-            $('[name=download_radio][value=selected]').prop('disabled', false).prop('checked', true);
-            $('[name=format_radio]').prop('disabled', true);
+            $('[name=download_radio][value=partial]').prop('disabled', false).prop('checked', true);
+            $('[name=download_radio][value=selected]').prop('disabled', false);
+            $('[name=format_radio]').prop('disabled', false);
         }
     }
     else {
         selected.splice(selected.indexOf(e.value), 1);
         if (selected.length == 0) {
             $('[name=download_radio][value=selected]').prop('disabled', true);
+            $('[name=download_radio][value=partial]').prop('disabled', true);
             $('[name=download_radio][value=all]').prop('checked', true);
         }
         $('#select_all').prop('checked', false);
     }
     $('#download_selected_lbl').text(selected.length);
+    $('#download_partial_lbl').text(selected.length);
 }
 
 //-----------------------------------

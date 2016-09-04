@@ -18,6 +18,7 @@ try {
     $stream_context = stream_context_create($options);
 
     // Host url
+	// $host = 'http://localhost:8890/sparql?query=';
     $host = 'http://localhost:3030/OmniStore/query?query=';
 
     // Get post parameters
@@ -30,38 +31,52 @@ try {
     $selected = json_decode($_POST['selected']);
     $validation_filter = $_POST['validation_filter'];
     $database_filter = json_decode($_POST['database_filter']);
+    $database_operator = $_POST['database_operator'];
     $pubmed_filter = $_POST['pubmed_filter'];
-	$mirna_pubmed_filter = $_POST['mirna_pubmed_filter'];
 
-	// Show/Hide column flags 
     $database_count = count($database_filter);
-    $show_mirdb = $database_count === 0 || in_array('mirdb', $database_filter);
-    $show_targetscan = $database_count === 0 || in_array('targetscan', $database_filter);
-    $show_miranda = $database_count === 0 || in_array('miranda', $database_filter);
-    $show_mirtarbase = $database_count === 0 || in_array('mirtarbase', $database_filter);
+    if($database_count == 0) {
+        echo json_encode(array('success' => false, 'error' => 'Select one or more data sources in the filters panel.'));
+        exit;
+    }
 
-	// Invalid score based on sort direction
+    $show_mirdb = in_array('mirdb', $database_filter);
+    $show_targetscan = in_array('targetscan', $database_filter);
+    $show_miranda = in_array('miranda', $database_filter);
+    $show_mirtarbase = in_array('mirtarbase', $database_filter);
+
     $invalid_score = $sort_dir == 'DESC' ? -9999 : 9999;
-	// Use min or max function in query base on sort direction
     $minmax = $sort_dir == 'DESC' ? 'MAX' : 'MIN';
-	// CSS class based on sort direction
     $sort_class = $sort_dir == 'DESC' ? ' sorting_desc' : ' sorting_asc';
 
-	// Having flags based on various filters
+    $database_having = [];
+    if ($show_mirdb) $database_having[] = '?mirdb_score != ' . $invalid_score;
+    if ($show_targetscan) $database_having[] = '?targetscan_score != ' . $invalid_score;
+    if ($show_miranda) $database_having[] = '?miranda_score != ' . $invalid_score;
+    if ($show_mirtarbase && $validation_filter == 'all') $database_having[] = '?mirtarbase_id != ""';
+    $database_operator = $database_operator == 'any' ? ' || ' : ' && ';
+
     $having = [];
-	if ($pubmed_filter == 'has') $having[] = '?pubmed_ids != ""';
-	else if ($pubmed_filter == 'no') $having[] = '?pubmed_ids = ""';
-    if ($database_count > 0 && $show_mirdb) $having[] = '?mirdb_score != ' . $invalid_score;
-    if ($database_count > 0 && $show_targetscan) $having[] = '?targetscan_score != ' . $invalid_score;
-    if ($database_count > 0 && $show_miranda) $having[] = '?miranda_score != ' . $invalid_score;
-    if ($database_count > 0 && $show_mirtarbase && $validation_filter == 'all') $having[] = '?mirtarbase_id != ""';
+    if ($pubmed_filter == 'has') $having[] = '?pubmed_ids != ""';
+    else if ($pubmed_filter == 'no') $having[] = '?pubmed_ids = ""';
     if ($validation_filter == 'predicted') $having[] = '?mirtarbase_id = ""';
     if ($validation_filter == 'validated') $having[] = '?mirtarbase_id != ""';
-    $having = count($having) == 0 ? '' : 'HAVING(' . implode(' && ', $having) . ') ';
+    if (count($database_having) > 0) $having[] = '(' . implode($database_operator, $database_having) . ')';
 
+    $having = count($having) == 0 ? '' : 'HAVING(' . implode(' && ', $having) . ') ';
+    $order_by = 'ORDER BY ' . $sort_dir . '(?' . $sort_col . ') ';
+
+    $default_having = 'HAVING((?mirdb_score != ' . $invalid_score .
+        ' || ?targetscan_score != ' . $invalid_score .
+        ' || ?miranda_score != ' . $invalid_score .
+        ' || ?mirtarbase_id != "")) ';
+
+	$error = $having == $default_having ? '<br/>There are no predicted/validated targets for microRNA ' . $mirna . '. <br/><br/>Visit <a href="http://rnacentral.org/search?q=' . $mirna . '" target="_blank">RNAcentral</a> to search more databases.' : 'No results found.<br/><br/>Add/Remove one or more filters to show results.';
+	
     // Build the query string
     $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
         'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+		'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ' .
         'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
         'PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#> ' .
         'SELECT ?gene_symbol ?gene_name  ' .
@@ -72,7 +87,7 @@ try {
         '(GROUP_CONCAT(DISTINCT COALESCE(?mtb_id, ""); SEPARATOR="") AS ?mirtarbase_id) ' .
         '(GROUP_CONCAT(DISTINCT COALESCE(?pubmed_id, ""); SEPARATOR=",") AS ?pubmed_ids) ' .
         'WHERE { ' .
-        '?mirna rdfs:label "' . $mirna . '" . ' .
+        '?mirna rdfs:label "' . $mirna . '"^^xsd:string . ' .
         '?prediction obo:OMIT_0000159 ?mirna . ' .
         '?prediction obo:OMIT_0000160 ?target . ' .
         '?target rdfs:label ?gene_symbol . ' .
@@ -100,58 +115,56 @@ try {
             '?prediction oboInOwl:hasDbXref ?mtb_id ' .
             '} ' .
         'OPTIONAL { ' .
-        ($mirna_pubmed_filter == 'true' ? '?mirna obo:OMIT_0000151 ?pubmed_id . ' : '') .
+        '?mirna obo:OMIT_0000151 ?pubmed_id . ' .
         '?target obo:OMIT_0000151 ?pubmed_id . ' .
         (!empty($mesh) ?
-            '?mesh_term rdfs:label "' . $mesh . '" . ' .
+            '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
             '?child (rdfs:subClassOf)* ?mesh_term . ' .
             '?child obo:OMIT_0000151 ?pubmed_id ' : '') .
         '} ' .
         '} ' .
         'GROUP BY ?gene_symbol ?gene_name ' .
-        $having;
+        $having . $order_by;
 
     // Build the query url
     $url = $host . urlencode($query);
 
-    // Check for apache jena server failure
+    // If the query failed
     if (($json = file_get_contents($url, false, $stream_context)) === false) {
+        // Server timed out
         echo json_encode(array('success' => false, 'error' => 'Server Timeout / Host Unreachable'));
         exit;
     }
 
-    // Check for json decode failure
+    // If decoding the json string failed
     if (($json = json_decode($json, true)) === null) {
+        // JSON decode failed
         echo json_encode(array('success' => false, 'error' => 'json decode error'));
         exit;
     }
-
-	// Check for empty result set
+	
     if (count($json['results']['bindings']) == 0 || empty($json['results']['bindings'][0])) {
-        echo json_encode(array('success' => false, 'error' => 'No results found'));
+        echo json_encode(array('success' => false, 'error' => $error));
         exit;
     }
 
-	// Build the list of gene symbols
     $targets = [];
     foreach ($json['results']['bindings'] as $item) {
         $targets[] = $item['gene_symbol']['value'];
     }
 
-	// Pagination values
     $total = count($targets);
     $rows = $rows == 'all' ? $total : $rows;
     $pages = ceil($total / $rows);
     $page = min($page, $pages);
 
-	// Sorting and limit values
-    $order_by = 'ORDER BY ' . $sort_dir . '(?' . $sort_col . ') ';
     $offset = $rows == 'all' ? '' : 'OFFSET ' . (($page - 1) * $rows) . ' ';
     $limit = $rows == 'all' ? '' : 'LIMIT ' . $rows . ' ';
 
     // Build the query string
     $query = 'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
         'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ' .
+		'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ' .
         'PREFIX obo: <http://purl.obolibrary.org/obo/> ' .
         'PREFIX oboInOwl: <http://www.geneontology.org/formats/oboInOwl#> ' .
         'SELECT ?gene_symbol ?gene_name ' .
@@ -162,7 +175,7 @@ try {
         '(GROUP_CONCAT(DISTINCT COALESCE(?mtb_id, ""); SEPARATOR="") AS ?mirtarbase_id) ' .
         '(GROUP_CONCAT(DISTINCT COALESCE(?pubmed_id, ""); SEPARATOR=",") AS ?pubmed_ids) ' .
         'WHERE { ' .
-        '?mirna rdfs:label "' . $mirna . '" . ' .
+        '?mirna rdfs:label "' . $mirna . '"^^xsd:string . ' .
         '?prediction obo:OMIT_0000159 ?mirna . ' .
         '?prediction obo:OMIT_0000160 ?target . ' .
         '?target rdfs:label ?gene_symbol . ' .
@@ -190,10 +203,10 @@ try {
             '?prediction oboInOwl:hasDbXref ?mtb_id ' .
             '} ' .
         'OPTIONAL { ' .
-        ($mirna_pubmed_filter == 'true' ? '?mirna obo:OMIT_0000151 ?pubmed_id . ' : '') .
+        '?mirna obo:OMIT_0000151 ?pubmed_id . ' .
         '?target obo:OMIT_0000151 ?pubmed_id . ' .
         (!empty($mesh) ?
-            '?mesh_term rdfs:label "' . $mesh . '" . ' .
+            '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
             '?child (rdfs:subClassOf)* ?mesh_term . ' .
             '?child obo:OMIT_0000151 ?pubmed_id ' : '') .
         '} ' .
@@ -204,25 +217,25 @@ try {
     // Build the query url
     $url = $host . urlencode($query);
 
-    // Check for apache jena server failure
+    // If the query failed
     if (($json = file_get_contents($url, false, $stream_context)) === false) {
+        // Server timed out
         echo json_encode(array('success' => false, 'error' => 'Server Timeout / Host Unreachable'));
         exit;
     }
 
-    // Check for json decode failure
+    // If decoding the json string failed
     if (($json = json_decode($json, true)) === null) {
+        // JSON decode failed
         echo json_encode(array('success' => false, 'error' => 'json decode error'));
         exit;
     }
 
-	// Check for empty result set
     if (count($json['results']['bindings']) == 0 || empty($json['results']['bindings'][0])) {
-        echo json_encode(array('success' => false, 'error' => 'No results found'));
+        echo json_encode(array('success' => false, 'error' => $error));
         exit;
     }
 
-	// Generate the table html code
     ob_start();
     include('table.php');
     $html = ob_get_contents();

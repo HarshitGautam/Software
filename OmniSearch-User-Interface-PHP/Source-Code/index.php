@@ -16,13 +16,15 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/ui/">OmniSearch UI</a>
+            <a class="navbar-brand" href="/ui/" style="padding: 5px">
+				<img src="/ui/images/logo.png" class="img-responsive" style="max-height: 40px"/>
+			</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/ui/about.php">About</a></li>
                 <li><a href="/ui/help.php">Help</a></li>
-                <li><a href="/ui/feedback.php">Feedback</a></li>
+                <li><a href="/" target="_blank">Wiki/Feedback</a></li>
             </ul>
         </div>
     </div>
@@ -37,7 +39,7 @@
                         Enter a microRNA name
                         <span class="glyphicon glyphicon-question-sign pull-right" style="color: yellow" data-toggle="tooltip" data-placement="left" title="Begin typing a complete microRNA name or part of such a name. Or simply press the down-arrow key without typing anything."></span>
                     </label>
-                    <input id="mirna" type="text" class="form-control" required/>
+                    <input id="mirna" type="text" class="form-control" required autofocus/>
                     <div></div>
                 </div>
             </div>
@@ -69,7 +71,7 @@
     </form>
     <div id="result_controls">
         <a id="rna_central_link" href="" target="_blank" class="btn btn-default">
-            <span class="glyphicon glyphicon-link"></span> RNA Central
+            <span class="glyphicon glyphicon-link"></span> RNAcentral
         </a>
         <button class="btn btn-default" type="button" onclick="$('#filter_panel').hide(); $('#download_panel').hide(); $('#analysis_panel').toggle()">
             <span class="glyphicon glyphicon-stats"></span> Perform Analysis
@@ -87,9 +89,9 @@
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th>Data Source Filter <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="left" title="Select one or more data sources to be included in the result set. Unchecked data sources will be excluded."></span></th>
+                <th>Data Source Filter</th>
                 <th>Validation Filter</th>
-                <th>Publications Filter</span></th>
+                <th>Publications Filter</th>
             </tr>
             </thead>
             <tbody>
@@ -97,20 +99,20 @@
                 <td>
                     <div>
                         <div class="checkbox">
-                            <label><input type="checkbox" name="database_filter" value="mirdb" autocomplete="off">miRDB</label>
+                            <label><input type="checkbox" name="database_filter" value="mirdb" autocomplete="off" checked>miRDB</label>
                         </div>
                         <div class="checkbox">
-                            <label><input type="checkbox" name="database_filter" value="targetscan" autocomplete="off">TargetScan</label>
+                            <label><input type="checkbox" name="database_filter" value="targetscan" autocomplete="off" checked>TargetScan</label>
                         </div>
                         <div class="checkbox">
-                            <label><input type="checkbox" name="database_filter" value="miranda" autocomplete="off">miRanda</label>
+                            <label><input type="checkbox" name="database_filter" value="miranda" autocomplete="off" checked>miRanda</label>
                         </div>
                         <div class="checkbox">
-                            <label><input type="checkbox" name="database_filter" value="mirtarbase" autocomplete="off">miRTarBase</label>
+                            <label><input type="checkbox" name="database_filter" value="mirtarbase" autocomplete="off" checked>miRTarBase</label>
                         </div>
                     </div>
                 </td>
-                <td>
+                <td rowspan="2">
                     <div>
                         <div class="radio">
                             <label><input type="radio" name="validation_filter" value="all" autocomplete="off" checked>Show All</label>
@@ -123,7 +125,7 @@
                         </div>
                     </div>
                 </td>
-                <td>
+                <td rowspan="2">
                     <div>
                         <div class="radio">
                             <label><input type="radio" name="pubmed_filter" value="all" autocomplete="off" checked>Show All</label>
@@ -135,23 +137,23 @@
                             <label><input type="radio" name="pubmed_filter" value="has" autocomplete="off">With Publications</label>
                         </div>
                     </div>
-					<br/>
-					<div>
-						<div class="checkbox">
-                            <label><input type="checkbox" name="mirna_pubmed_filter" value="mirna" autocomplete="off" checked>Filtered by microRNA</label>
-                        </div>
-					</div>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <button id="apply_btn1" type="button" class="btn btn-default" onclick="selected = []; $('#download_selected_lbl').text(selected.length); search()" autocomplete="off" disabled>Apply Now</button>
+                    <div>
+                        <div class="radio">
+                            <label><input type="radio" name="database_operator" value="any" autocomplete="off" checked>Show targets appearing in ANY selected source</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="database_operator" value="all" autocomplete="off">Show targets appearing in ALL selected sources</label>
+                        </div>
+                    </div>
                 </td>
-                <td>
-                    <button id="apply_btn2" type="button" class="btn btn-default" onclick="selected = []; $('#download_selected_lbl').text(selected.length); search()" autocomplete="off" disabled>Apply Now</button>
-                </td>
-                <td>
-                    <button id="apply_btn3" type="button" class="btn btn-default" onclick="selected = []; $('#download_selected_lbl').text(selected.length); search()" autocomplete="off" disabled>Apply Now</button>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <button id="apply_btn" type="button" class="btn btn-default" onclick="applyFilters()" autocomplete="off" disabled>Apply Selected Filters</button>
                 </td>
             </tr>
             </tbody>
@@ -173,7 +175,10 @@
                             <label><input type="radio" name="download_radio" value="all" autocomplete="off" checked>Download the whole table (<span id="download_all_lbl">0</span>)</label>
                         </div>
                         <div class="radio">
-                            <label><input type="radio" name="download_radio" value="selected" autocomplete="off" disabled>Download selected targets (<span id="download_selected_lbl">0</span>)</label>
+                            <label><input type="radio" name="download_radio" value="partial" autocomplete="off" disabled>Download the partial table with selected targets (<span id="download_partial_lbl">0</span>)</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="download_radio" value="selected" autocomplete="off" disabled>Download selected targets only (<span id="download_selected_lbl">0</span>)</label>
                         </div>
                     </div>
                 </td>
@@ -200,8 +205,8 @@
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th width="50%">Select DAVID Tool</th>
-                <th width="50%">Select PANTHER Tool</th>
+                <th width="50%">Select <a href="https://david.ncifcrf.gov/home.jsp" target="_blank">DAVID</a> Tool</th>
+                <th width="50%">Select <a href="http://pantherdb.org/" target="_blank">PANTHER</a> Tool</th>
             </tr>
             </thead>
             <tbody>
@@ -223,9 +228,9 @@
                         <option value="biological_process" selected>biological process</option>
                         <option value="molecular_function">molecular function</option>
                         <option value="cellular_component">cellular component</option>
-                        <option value="biological_process_exp">biological process (experimental only)</option>
+                        <!--<option value="biological_process_exp">biological process (experimental only)</option>
                         <option value="molecular_function_exp">molecular function (experimental only)</option>
-                        <option value="cellular_component_exp">cellular component (experimental only)</option>
+                        <option value="cellular_component_exp">cellular component (experimental only)</option>-->
                     </select>
                 </td>
             </tr>

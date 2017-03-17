@@ -22,6 +22,7 @@ try {
     $host = 'http://localhost:3030/OmniStore/query?query=';
 
     // Get post parameters
+	$gene = $_POST['gene'];
     $mirna = $_POST['mirna'];
     $mesh = $_POST['mesh'];
     $page = $_POST['page'];
@@ -30,6 +31,7 @@ try {
     $sort_col = $_POST['sort_col'];
     $selected = json_decode($_POST['selected']);
     $validation_filter = $_POST['validation_filter'];
+	$mesh_filter= $_POST['mesh_filter'];
     $database_filter = json_decode($_POST['database_filter']);
     $database_operator = $_POST['database_operator'];
     $pubmed_filter = $_POST['pubmed_filter'];
@@ -86,12 +88,16 @@ try {
         ($show_miranda ? '(' . $minmax . '(COALESCE(ABS(?mrnd_score), ' . $invalid_score . ')) AS ?miranda_score) ' : '') .
         '(GROUP_CONCAT(DISTINCT COALESCE(?mtb_id, ""); SEPARATOR="") AS ?mirtarbase_id) ' .
         '(GROUP_CONCAT(DISTINCT COALESCE(?pubmed_id, ""); SEPARATOR=",") AS ?pubmed_ids) ' .
+		
+		
         'WHERE { ' .
+		 
         '?mirna rdfs:label "' . $mirna . '"^^xsd:string . ' .
         '?prediction obo:OMIT_0000159 ?mirna . ' .
         '?prediction obo:OMIT_0000160 ?target . ' .
         '?target rdfs:label ?gene_symbol . ' .
         '?target rdfs:comment ?gene_name . ' .
+		 
         'OPTIONAL { ' .
         '?target obo:OMIT_0000169 ?go_count ' .
         '} ' .
@@ -114,13 +120,27 @@ try {
             '?prediction rdf:type obo:OMIT_0000174 . ' .
             '?prediction oboInOwl:hasDbXref ?mtb_id ' .
             '} ' .
+			
+           
+            
+            
         'OPTIONAL { ' .
         '?mirna obo:OMIT_0000151 ?pubmed_id . ' .
         '?target obo:OMIT_0000151 ?pubmed_id . ' .
-        (!empty($mesh) ?
+        ( (!empty($mesh) && ($mesh_filter=='exact') )?
             '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
-            '?child (rdfs:subClassOf)* ?mesh_term . ' .
+            
+            '?mesh_term obo:OMIT_0000151 ?pubmed_id ' : '') .
+		( (!empty($mesh) && ($mesh_filter=='narrow') )?
+            '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
+            '?child rdfs:subClassOf* ?mesh_term .'.
             '?child obo:OMIT_0000151 ?pubmed_id ' : '') .
+		( (!empty($mesh) && ($mesh_filter=='broader') )?
+            '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
+			
+            '?mesh_term rdfs:subClassOf* ?parent .'.
+			
+            '?parent obo:OMIT_0000151 ?pubmed_id ' : '') .
         '} ' .
         '} ' .
         'GROUP BY ?gene_symbol ?gene_name ' .
@@ -174,12 +194,15 @@ try {
         ($show_miranda ? '(' . $minmax . '(COALESCE(ABS(?mrnd_score), ' . $invalid_score . ')) AS ?miranda_score) ' : '') .
         '(GROUP_CONCAT(DISTINCT COALESCE(?mtb_id, ""); SEPARATOR="") AS ?mirtarbase_id) ' .
         '(GROUP_CONCAT(DISTINCT COALESCE(?pubmed_id, ""); SEPARATOR=",") AS ?pubmed_ids) ' .
+		
         'WHERE { ' .
+		
         '?mirna rdfs:label "' . $mirna . '"^^xsd:string . ' .
         '?prediction obo:OMIT_0000159 ?mirna . ' .
         '?prediction obo:OMIT_0000160 ?target . ' .
         '?target rdfs:label ?gene_symbol . ' .
         '?target rdfs:comment ?gene_name . ' .
+		 
         'OPTIONAL { ' .
         '?target obo:OMIT_0000169 ?go_count ' .
         '} ' .
@@ -202,13 +225,25 @@ try {
             '?prediction rdf:type obo:OMIT_0000174 . ' .
             '?prediction oboInOwl:hasDbXref ?mtb_id ' .
             '} ' .
+			
+            
         'OPTIONAL { ' .
         '?mirna obo:OMIT_0000151 ?pubmed_id . ' .
         '?target obo:OMIT_0000151 ?pubmed_id . ' .
-        (!empty($mesh) ?
+        ( (!empty($mesh) && ($mesh_filter=='exact') )?
             '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
-            '?child (rdfs:subClassOf)* ?mesh_term . ' .
+            
+            '?mesh_term obo:OMIT_0000151 ?pubmed_id ' : '') .
+			( (!empty($mesh) && ($mesh_filter=='narrow') )?
+            '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
+            '?child rdfs:subClassOf* ?mesh_term .'.
             '?child obo:OMIT_0000151 ?pubmed_id ' : '') .
+			( (!empty($mesh) && ($mesh_filter=='broader') )?
+            '?mesh_term rdfs:label "' . $mesh . '"^^xsd:string . ' .
+			
+            '?mesh_term rdfs:subClassOf* ?parent .'.
+			
+            '?parent obo:OMIT_0000151 ?pubmed_id ' : '') .
         '} ' .
         '} ' .
         'GROUP BY ?gene_symbol ?gene_name ' .
@@ -217,6 +252,7 @@ try {
     // Build the query url
     $url = $host . urlencode($query);
 
+	
     // If the query failed
     if (($json = file_get_contents($url, false, $stream_context)) === false) {
         // Server timed out

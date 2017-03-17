@@ -12,6 +12,7 @@ var validation_filter = 'all';
 var database_filter = ['mirdb', 'targetscan', 'miranda', 'mirtarbase'];
 var database_operator = 'any';
 var pubmed_filter = 'all';
+var mesh_filter='exact';
 var jqxhr = null;
 
 //-----------------------------------
@@ -27,6 +28,7 @@ function reset() {
     rows = 100;
     sort_dir = 'DESC';
     sort_col = 'mirdb_score';
+	mesh_filter='exact';
     selected = [];
     jqxhr = null;
 
@@ -66,6 +68,7 @@ function enableAll() {
     $('[name=database_operator][value=' + database_operator + ']').prop('checked', true);
     $('[name=validation_filter][value=' + validation_filter + ']').prop('checked', true);
     $('[name=pubmed_filter][value=' + pubmed_filter + ']').prop('checked', true);
+	 $('[name=mesh_filter][value=' + mesh_filter + ']').prop('checked', true);
 
     if (selected.length == 0) {
         $('[name=download_radio][value=selected]').prop('disabled', true);
@@ -260,6 +263,7 @@ $('#search_form').on('submit', function (e) {
 });
 
 function search() {
+	
     $('#mirna').val(mirna);
     $('#mesh').val(mesh);
 
@@ -276,6 +280,7 @@ function search() {
             validation_filter: validation_filter,
             database_filter: JSON.stringify(database_filter),
             database_operator: database_operator,
+			mesh_filter:mesh_filter,
             pubmed_filter: pubmed_filter
         })
         .done(function (json) {
@@ -336,7 +341,7 @@ function applyFilters() {
     database_operator = $('[name=database_operator]:checked').val();
     validation_filter = $('[name=validation_filter]:checked').val();
     pubmed_filter = $('[name=pubmed_filter]:checked').val();
-
+	mesh_filter=$('[name=mesh_filter]:checked').val();
     search();
 }
 
@@ -570,7 +575,7 @@ function onSelect(e) {
 //-----------------------------------
 function sort(col) {
     if(sort_col != col) {
-        if(col == 'gene_symbol' || col == 'gene_name')
+        if(col == 'gene_symbol' || col == 'gene_name'|| col=='weighted_score')
             sort_dir = 'ASC';
         else
             sort_dir = 'DESC';

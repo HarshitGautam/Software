@@ -16,14 +16,16 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/ui/" style="padding: 5px">
-				<img src="/ui/images/logo.png" class="img-responsive" style="max-height: 40px"/>
+            <a class="navbar-brand" href="/uitestnew/" style="padding: 5px">
+				<img src="/uitestnew/images/logo.png" class="img-responsive" style="max-height: 40px"/>
 			</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/ui/about.php">About</a></li>
-                <li><a href="/ui/help.php">Help</a></li>
+	               <li> <a href="reverseindex.php" class="btn btn-link btn-lg" role="button" style="background-color:rgb(255, 255, 100);color:black;font-size: 13px;height: 45px;opacity: 0.8;color:black;border: 1px solid rgb(79, 129, 98);font-weight: bold;text-decoration:none">Click here to search microRNAs given a target gene</a>
+										</li>
+                <li><a href="/uitestnew/about.php">About</a></li>
+                <li><a href="/uitestnew/help.php">Help</a></li>
                 <li><a href="/" target="_blank">Wiki/Feedback</a></li>
             </ul>
         </div>
@@ -43,6 +45,7 @@
                     <div></div>
                 </div>
             </div>
+
             <div class="col-md-4 col-sm-4">
                 <div class="searchbox">
                     <label for="mesh">
@@ -79,9 +82,10 @@
         <button class="btn btn-default" type="button" onclick="$('#filter_panel').hide(); $('#analysis_panel').hide(); $('#download_panel').toggle()">
             <span class="glyphicon glyphicon-download-alt"></span> Download Results
         </button>
-        <button class="btn btn-default" type="button" onclick="reset()">
+        <a href="index.php" ><button class="btn btn-default" type="button" >
             <span class="glyphicon glyphicon-remove"></span> Clear Results
         </button>
+		</a>
     </div>
 </div>
 <div id="wrapper">
@@ -92,6 +96,7 @@
                 <th>Data Source Filter</th>
                 <th>Validation Filter</th>
                 <th>Publications Filter</th>
+				<th>Mesh Term Filter</th>
             </tr>
             </thead>
             <tbody>
@@ -138,6 +143,19 @@
                         </div>
                     </div>
                 </td>
+				<td rowspan="2">
+                    <div>
+                        <div class="radio">
+                            <label><input type="radio" name="mesh_filter" value="exact" autocomplete="off" checked>Exact Match</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="mesh_filter" value="broader" autocomplete="off">Broader Match</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="mesh_filter" value="narrow" autocomplete="off">Narrower Match</label>
+                        </div>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td>
@@ -152,7 +170,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="3">
+                <td colspan="4">
                     <button id="apply_btn" type="button" class="btn btn-default" onclick="applyFilters()" autocomplete="off" disabled>Apply Selected Filters</button>
                 </td>
             </tr>
